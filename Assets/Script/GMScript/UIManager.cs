@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    public MusicManager musicManager;
+
     public Button pauseResumeBtn;
     public Sprite pauseImg;
     public Sprite resumeImg;
@@ -41,6 +43,8 @@ public class UIManager : MonoBehaviour
 
         testGameStateBtn.gameObject.SetActive(true);
         UpdateTestButtonLabel("TEST START");
+
+        musicManager.PlayHomeMusic();
     }
 
     public void SetupSettingsMenu()
@@ -132,6 +136,8 @@ public class UIManager : MonoBehaviour
         gameStarted = true;
         Time.timeScale = 1;
 
+        musicManager.PlayInGameMusic();
+
         startPanel.SetActive(false);
 
         if (tapToStart != null)
@@ -159,6 +165,8 @@ public class UIManager : MonoBehaviour
         gameStarted = false;
         Time.timeScale = 0;
 
+        musicManager.PlayGameOverMusic();
+
         pausePanel.SetActive(false);
         pauseMenu.SetActive(false);
         settingsPanel.SetActive(false);
@@ -169,6 +177,7 @@ public class UIManager : MonoBehaviour
         pauseResumeBtn.interactable = false;
 
         gameOverPanel.SetActive(true);
+        gameOverPanel.transform.SetAsLastSibling();
 
         UpdateTestButtonLabel("TEST START");
         testGameStateBtn.gameObject.SetActive(false);
@@ -188,6 +197,8 @@ public class UIManager : MonoBehaviour
     {
         gameStarted = false;
         Time.timeScale = 1;
+
+        musicManager.PlayHomeMusic();
 
         gameOverPanel.SetActive(false);
 
