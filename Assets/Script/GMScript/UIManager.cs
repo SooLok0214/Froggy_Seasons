@@ -21,6 +21,7 @@ public class UIManager : MonoBehaviour
     public GameObject pauseMenu;
     public GameObject settingsPanel;
     public GameObject menuBack;
+    public GameObject joystickObject;
 
     void Start()
     {
@@ -28,6 +29,7 @@ public class UIManager : MonoBehaviour
         gameStarted = false;
 
         SetupSettingsMenu();
+        SetJoystickVisible(false);
 
         startPanel.SetActive(true);
 
@@ -61,6 +63,68 @@ public class UIManager : MonoBehaviour
         menuBack.GetComponent<Button>().onClick.AddListener(BackToPauseMenu);
     }
 
+    private void FindJoystick()
+    {
+        if (joystickObject != null)
+        {
+            ConfigureJoystickArea();
+            return;
+        }
+
+        foreach (GameObject candidate in Resources.FindObjectsOfTypeAll<GameObject>())
+        {
+            if (candidate.name == "Variable Joystick" && candidate.scene.IsValid())
+            {
+                joystickObject = candidate;
+                ConfigureJoystickArea();
+                break;
+            }
+        }
+    }
+
+    private void ConfigureJoystickArea()
+    {
+        if (joystickObject == null)
+        {
+            return;
+        }
+
+        RectTransform joystickRect = joystickObject.GetComponent<RectTransform>();
+        Canvas canvas = joystickObject.GetComponentInParent<Canvas>();
+        RectTransform canvasRect = canvas != null ? canvas.GetComponent<RectTransform>() : null;
+
+        if (joystickRect == null || canvasRect == null)
+        {
+            return;
+        }
+
+        // Floating Joystick can only start inside the left, middle-lower screen area.
+        // Keep its existing scale so the joystick artwork size and proportions do not change.
+        float scaleX = Mathf.Max(Mathf.Abs(joystickRect.localScale.x), 0.001f);
+        float scaleY = Mathf.Max(Mathf.Abs(joystickRect.localScale.y), 0.001f);
+        float canvasWidth = canvasRect.rect.width;
+        float canvasHeight = canvasRect.rect.height;
+
+        joystickRect.anchorMin = Vector2.zero;
+        joystickRect.anchorMax = Vector2.zero;
+        joystickRect.pivot = Vector2.zero;
+        joystickRect.anchoredPosition = new Vector2(canvasWidth * 0.05f, canvasHeight * 0.10f);
+        joystickRect.sizeDelta = new Vector2(
+            canvasWidth * 0.40f / scaleX,
+            canvasHeight * 0.45f / scaleY
+        );
+    }
+
+    private void SetJoystickVisible(bool visible)
+    {
+        FindJoystick();
+
+        if (joystickObject != null)
+        {
+            joystickObject.SetActive(visible);
+        }
+    }
+
     public void OpenSettings()
     {
         if (!gameStarted)
@@ -71,6 +135,7 @@ public class UIManager : MonoBehaviour
         pauseMenu.SetActive(false);
         settingsPanel.SetActive(true);
         menuBack.SetActive(true);
+        SetJoystickVisible(false);
     }
 
     public void BackToPauseMenu()
@@ -88,6 +153,7 @@ public class UIManager : MonoBehaviour
         pauseMenu.SetActive(true);
         settingsPanel.SetActive(false);
         menuBack.SetActive(false);
+        SetJoystickVisible(false);
     }
 
     public void PauseResume()
@@ -107,6 +173,7 @@ public class UIManager : MonoBehaviour
             pauseMenu.SetActive(false);
             settingsPanel.SetActive(false);
             menuBack.SetActive(false);
+            SetJoystickVisible(true);
         }
         else
         {
@@ -114,6 +181,7 @@ public class UIManager : MonoBehaviour
 
             pauseResumeBtn.image.overrideSprite = resumeImg;
 
+            SetJoystickVisible(false);
             pausePanel.SetActive(true);
             ResetPauseMenu();
         }
@@ -158,6 +226,7 @@ public class UIManager : MonoBehaviour
 
         testGameStateBtn.gameObject.SetActive(true);
         UpdateTestButtonLabel("TEST DEATH");
+        SetJoystickVisible(true);
     }
 
     public void GameOver()
@@ -181,6 +250,7 @@ public class UIManager : MonoBehaviour
 
         UpdateTestButtonLabel("TEST START");
         testGameStateBtn.gameObject.SetActive(false);
+        SetJoystickVisible(false);
     }
 
     public void UpdateTestButtonLabel(string labelText)
@@ -220,5 +290,6 @@ public class UIManager : MonoBehaviour
 
         testGameStateBtn.gameObject.SetActive(true);
         UpdateTestButtonLabel("TEST START");
+        SetJoystickVisible(false);
     }
 }
