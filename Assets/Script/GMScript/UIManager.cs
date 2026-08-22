@@ -1,295 +1,211 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    public const string MainMenuScene = "Main_Use_Scene";
+    public const string GameplayScene = "InGameScene";
+
     public MusicManager musicManager;
 
     public Button pauseResumeBtn;
     public Sprite pauseImg;
     public Sprite resumeImg;
 
-    public GameObject pausePanel;
     public GameObject startPanel;
-    public GameObject tapToStart;
-    public GameObject gameOverPanel;
+    public GameObject homeMenu;
 
-    public Button testGameStateBtn;
-
-    public bool gameStarted;
-
+    public GameObject pausePanel;
     public GameObject pauseMenu;
     public GameObject settingsPanel;
     public GameObject menuBack;
-    public GameObject joystickObject;
 
-    void Start()
+    public GameObject gameOverPanel;
+    public GameObject joystickObject;
+    public GameObject testGameStateBtn;
+
+    public bool gameStarted;
+    public bool settingsOpenedFromHome;
+
+    public void Start()
+    {
+        if (MusicManager.instance != null)
+            musicManager = MusicManager.instance;
+
+        if (SceneManager.GetActiveScene().name == GameplayScene)
+            BeginGameplayScene();
+        else
+            ShowMainMenu();
+    }
+
+    public void StartGame()
     {
         Time.timeScale = 1;
-        gameStarted = false;
-
-        SetupSettingsMenu();
-        SetJoystickVisible(false);
-
-        startPanel.SetActive(true);
-
-        pausePanel.SetActive(false);
-        pauseMenu.SetActive(false);
-        settingsPanel.SetActive(false);
-        menuBack.SetActive(false);
-
-        pauseResumeBtn.gameObject.SetActive(false);
-        pauseResumeBtn.interactable = false;
-
-        gameOverPanel.SetActive(false);
-
-        testGameStateBtn.gameObject.SetActive(true);
-        UpdateTestButtonLabel("TEST START");
-
-        musicManager.PlayHomeMusic();
+        SceneManager.LoadScene(GameplayScene);
     }
 
-    public void SetupSettingsMenu()
+    public void BeginGameplayScene()
     {
-        foreach (Button button in pausePanel.GetComponentsInChildren<Button>(true))
+        gameStarted = true;
+        settingsOpenedFromHome = false;
+        Time.timeScale = 1;
+
+        if (musicManager != null)
+            musicManager.PlayInGameMusic();
+
+        SetActive(startPanel, false);
+        SetActive(homeMenu, false);
+        SetActive(gameOverPanel, false);
+        HidePauseUI();
+
+        if (pauseResumeBtn != null)
         {
-            if (button.name.Contains("Setting"))
-            {
-                button.onClick.AddListener(OpenSettings);
-                break;
-            }
+            pauseResumeBtn.gameObject.SetActive(true);
+            pauseResumeBtn.image.overrideSprite = pauseImg;
         }
 
-        menuBack.GetComponent<Button>().onClick.AddListener(BackToPauseMenu);
+        SetActive(joystickObject, true);
+        SetActive(testGameStateBtn, true);
     }
 
-    private void FindJoystick()
+    public void PauseResume()
     {
-        if (joystickObject != null)
-        {
-            ConfigureJoystickArea();
+        if (!gameStarted)
             return;
-        }
 
-        foreach (GameObject candidate in Resources.FindObjectsOfTypeAll<GameObject>())
+        bool pausing = Time.timeScale == 1;
+        Time.timeScale = pausing ? 0 : 1;
+
+        if (pauseResumeBtn != null)
+            pauseResumeBtn.image.overrideSprite = pausing ? resumeImg : pauseImg;
+
+        if (pausing)
         {
-            if (candidate.name == "Variable Joystick" && candidate.scene.IsValid())
-            {
-                joystickObject = candidate;
-                ConfigureJoystickArea();
-                break;
-            }
+            SetActive(pausePanel, true);
+            SetActive(pauseMenu, true);
+            SetActive(settingsPanel, false);
+            SetActive(menuBack, false);
+            SetActive(joystickObject, false);
         }
-    }
-
-    private void ConfigureJoystickArea()
-    {
-        if (joystickObject == null)
+        else
         {
-            return;
-        }
-
-        RectTransform joystickRect = joystickObject.GetComponent<RectTransform>();
-        Canvas canvas = joystickObject.GetComponentInParent<Canvas>();
-        RectTransform canvasRect = canvas != null ? canvas.GetComponent<RectTransform>() : null;
-
-        if (joystickRect == null || canvasRect == null)
-        {
-            return;
-        }
-
-        // Floating Joystick can only start inside the left, middle-lower screen area.
-        // Keep its existing scale so the joystick artwork size and proportions do not change.
-        float scaleX = Mathf.Max(Mathf.Abs(joystickRect.localScale.x), 0.001f);
-        float scaleY = Mathf.Max(Mathf.Abs(joystickRect.localScale.y), 0.001f);
-        float canvasWidth = canvasRect.rect.width;
-        float canvasHeight = canvasRect.rect.height;
-
-        joystickRect.anchorMin = Vector2.zero;
-        joystickRect.anchorMax = Vector2.zero;
-        joystickRect.pivot = Vector2.zero;
-        joystickRect.anchoredPosition = new Vector2(canvasWidth * 0.05f, canvasHeight * 0.10f);
-        joystickRect.sizeDelta = new Vector2(
-            canvasWidth * 0.40f / scaleX,
-            canvasHeight * 0.45f / scaleY
-        );
-    }
-
-    private void SetJoystickVisible(bool visible)
-    {
-        FindJoystick();
-
-        if (joystickObject != null)
-        {
-            joystickObject.SetActive(visible);
+            HidePauseUI();
+            SetActive(joystickObject, true);
         }
     }
 
     public void OpenSettings()
     {
         if (!gameStarted)
-        {
             return;
-        }
 
-        pauseMenu.SetActive(false);
-        settingsPanel.SetActive(true);
-        menuBack.SetActive(true);
-        SetJoystickVisible(false);
+        settingsOpenedFromHome = false;
+        SetActive(pauseMenu, false);
+        SetActive(settingsPanel, true);
+        SetActive(menuBack, true);
     }
 
     public void BackToPauseMenu()
     {
-        if (!gameStarted)
+        if (settingsOpenedFromHome || !gameStarted)
         {
+            settingsOpenedFromHome = false;
+            HidePauseUI();
+            SetActive(homeMenu, true);
             return;
         }
 
-        ResetPauseMenu();
+        SetActive(pauseMenu, true);
+        SetActive(settingsPanel, false);
+        SetActive(menuBack, false);
     }
 
-    public void ResetPauseMenu()
+    public void OpenHomeSettings()
     {
-        pauseMenu.SetActive(true);
-        settingsPanel.SetActive(false);
-        menuBack.SetActive(false);
-        SetJoystickVisible(false);
-    }
-
-    public void PauseResume()
-    {
-        if (!gameStarted)
-        {
+        if (gameStarted)
             return;
-        }
 
-        if (Time.timeScale == 0)
-        {
-            Time.timeScale = 1;
-
-            pauseResumeBtn.image.overrideSprite = pauseImg;
-
-            pausePanel.SetActive(false);
-            pauseMenu.SetActive(false);
-            settingsPanel.SetActive(false);
-            menuBack.SetActive(false);
-            SetJoystickVisible(true);
-        }
-        else
-        {
-            Time.timeScale = 0;
-
-            pauseResumeBtn.image.overrideSprite = resumeImg;
-
-            SetJoystickVisible(false);
-            pausePanel.SetActive(true);
-            ResetPauseMenu();
-        }
-    }
-
-    public void TestGameState()
-    {
-        if (!gameStarted)
-        {
-            StartGame();
-        }
-        else
-        {
-            GameOver();
-        }
-    }
-
-    public void StartGame()
-    {
-        gameStarted = true;
-        Time.timeScale = 1;
-
-        musicManager.PlayInGameMusic();
-
-        startPanel.SetActive(false);
-
-        if (tapToStart != null)
-        {
-            tapToStart.SetActive(false);
-        }
-
-        gameOverPanel.SetActive(false);
-
-        pausePanel.SetActive(false);
-        pauseMenu.SetActive(false);
-        settingsPanel.SetActive(false);
-        menuBack.SetActive(false);
-
-        pauseResumeBtn.image.overrideSprite = pauseImg;
-        pauseResumeBtn.gameObject.SetActive(true);
-        pauseResumeBtn.interactable = true;
-
-        testGameStateBtn.gameObject.SetActive(true);
-        UpdateTestButtonLabel("TEST DEATH");
-        SetJoystickVisible(true);
+        settingsOpenedFromHome = true;
+        SetActive(homeMenu, false);
+        SetActive(pausePanel, true);
+        SetActive(pauseMenu, false);
+        SetActive(settingsPanel, true);
+        SetActive(menuBack, true);
     }
 
     public void GameOver()
     {
         gameStarted = false;
+        settingsOpenedFromHome = false;
         Time.timeScale = 0;
 
-        musicManager.PlayGameOverMusic();
+        if (musicManager != null)
+            musicManager.PlayGameOverMusic();
 
-        pausePanel.SetActive(false);
-        pauseMenu.SetActive(false);
-        settingsPanel.SetActive(false);
-        menuBack.SetActive(false);
+        HidePauseUI();
 
-        pauseResumeBtn.image.overrideSprite = pauseImg;
-        pauseResumeBtn.gameObject.SetActive(true);
-        pauseResumeBtn.interactable = false;
-
-        gameOverPanel.SetActive(true);
-        gameOverPanel.transform.SetAsLastSibling();
-
-        UpdateTestButtonLabel("TEST START");
-        testGameStateBtn.gameObject.SetActive(false);
-        SetJoystickVisible(false);
-    }
-
-    public void UpdateTestButtonLabel(string labelText)
-    {
-        Text label = testGameStateBtn.GetComponentInChildren<Text>();
-
-        if (label != null)
+        if (pauseResumeBtn != null)
         {
-            label.text = labelText;
+            pauseResumeBtn.gameObject.SetActive(false);
+            pauseResumeBtn.image.overrideSprite = pauseImg;
         }
+
+        SetActive(joystickObject, false);
+        SetActive(testGameStateBtn, false);
+        SetActive(gameOverPanel, true);
+
+        if (gameOverPanel != null)
+            gameOverPanel.transform.SetAsLastSibling();
     }
 
     public void BackToStartMenu()
     {
-        gameStarted = false;
-        Time.timeScale = 1;
-
-        musicManager.PlayHomeMusic();
-
-        gameOverPanel.SetActive(false);
-
-        pausePanel.SetActive(false);
-        pauseMenu.SetActive(false);
-        settingsPanel.SetActive(false);
-        menuBack.SetActive(false);
-
-        pauseResumeBtn.image.overrideSprite = pauseImg;
-        pauseResumeBtn.gameObject.SetActive(false);
-        pauseResumeBtn.interactable = false;
-
-        startPanel.SetActive(true);
-
-        if (tapToStart != null)
+        if (SceneManager.GetActiveScene().name == GameplayScene)
         {
-            tapToStart.SetActive(true);
+            Time.timeScale = 1;
+            SceneManager.LoadScene(MainMenuScene);
+            return;
         }
 
-        testGameStateBtn.gameObject.SetActive(true);
-        UpdateTestButtonLabel("TEST START");
-        SetJoystickVisible(false);
+        ShowMainMenu();
+    }
+
+    public void ShowMainMenu()
+    {
+        gameStarted = false;
+        settingsOpenedFromHome = false;
+        Time.timeScale = 1;
+
+        if (musicManager != null)
+            musicManager.PlayHomeMusic();
+
+        SetActive(startPanel, true);
+        SetActive(gameOverPanel, false);
+        SetActive(homeMenu, true);
+        HidePauseUI();
+
+        if (pauseResumeBtn != null)
+        {
+            pauseResumeBtn.gameObject.SetActive(false);
+            pauseResumeBtn.image.overrideSprite = pauseImg;
+        }
+
+        SetActive(joystickObject, false);
+        SetActive(testGameStateBtn, false);
+    }
+
+    public void HidePauseUI()
+    {
+        SetActive(pausePanel, false);
+        SetActive(pauseMenu, false);
+        SetActive(settingsPanel, false);
+        SetActive(menuBack, false);
+    }
+
+    public void SetActive(GameObject target, bool active)
+    {
+        if (target != null)
+            target.SetActive(active);
     }
 }
