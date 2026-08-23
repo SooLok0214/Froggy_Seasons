@@ -86,7 +86,7 @@ public static class FroggySceneBuilder
         AssetDatabase.SaveAssets();
 
         EditorSceneManager.OpenScene(MenuScenePath, OpenSceneMode.Single);
-        Debug.Log("[Codex] InGameScene created. Map imported at 1:1 scale; gameplay UI and death test retained.");
+        Debug.Log("[Codex] InGameScene created. Map imported at 1:1 scale and gameplay UI retained.");
     }
 
     public static GameObject FindSceneObject(Scene scene, string objectName)

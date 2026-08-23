@@ -8,6 +8,7 @@ public class UIManager : MonoBehaviour
     public const string GameplayScene = "InGameScene";
 
     public MusicManager musicManager;
+    public ScoreManager scoreManager;
 
     public Button pauseResumeBtn;
     public Sprite pauseImg;
@@ -23,7 +24,6 @@ public class UIManager : MonoBehaviour
 
     public GameObject gameOverPanel;
     public GameObject joystickObject;
-    public GameObject testGameStateBtn;
 
     public bool gameStarted;
     public bool settingsOpenedFromHome;
@@ -32,6 +32,9 @@ public class UIManager : MonoBehaviour
     {
         if (MusicManager.instance != null)
             musicManager = MusicManager.instance;
+
+        if (scoreManager == null)
+            scoreManager = FindAnyObjectByType<ScoreManager>();
 
         if (SceneManager.GetActiveScene().name == GameplayScene)
             BeginGameplayScene();
@@ -51,6 +54,12 @@ public class UIManager : MonoBehaviour
         settingsOpenedFromHome = false;
         Time.timeScale = 1;
 
+        if (scoreManager == null)
+            scoreManager = FindAnyObjectByType<ScoreManager>();
+
+        if (scoreManager != null)
+            scoreManager.StartScore();
+
         if (musicManager != null)
             musicManager.PlayInGameMusic();
 
@@ -66,7 +75,6 @@ public class UIManager : MonoBehaviour
         }
 
         SetActive(joystickObject, true);
-        SetActive(testGameStateBtn, true);
     }
 
     public void PauseResume()
@@ -136,6 +144,12 @@ public class UIManager : MonoBehaviour
 
     public void GameOver()
     {
+        if (scoreManager == null)
+            scoreManager = FindAnyObjectByType<ScoreManager>();
+
+        if (scoreManager != null)
+            scoreManager.StopScore();
+
         gameStarted = false;
         settingsOpenedFromHome = false;
         Time.timeScale = 0;
@@ -152,7 +166,6 @@ public class UIManager : MonoBehaviour
         }
 
         SetActive(joystickObject, false);
-        SetActive(testGameStateBtn, false);
         SetActive(gameOverPanel, true);
 
         if (gameOverPanel != null)
@@ -192,7 +205,6 @@ public class UIManager : MonoBehaviour
         }
 
         SetActive(joystickObject, false);
-        SetActive(testGameStateBtn, false);
     }
 
     public void HidePauseUI()
