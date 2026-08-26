@@ -16,6 +16,13 @@ public static class FroggySfxSetup
     [MenuItem("Tools/Froggy Seasons/Setup SFX")]
     public static void SetupSfx()
     {
+        // Keep the Home logo button as a normal scene object, even if an optional
+        // audio asset is temporarily missing.
+        Scene mainScene = EditorSceneManager.OpenScene(MainScenePath, OpenSceneMode.Single);
+        SetupHomeLogoButton();
+        EditorSceneManager.MarkSceneDirty(mainScene);
+        EditorSceneManager.SaveScene(mainScene);
+
         AudioClip buttonSfx = AssetDatabase.LoadAssetAtPath<AudioClip>(ButtonSfxPath);
         AudioClip frogCroak = AssetDatabase.LoadAssetAtPath<AudioClip>(FrogCroakPath);
         AudioMixer mixer = AssetDatabase.LoadAssetAtPath<AudioMixer>(MixerPath);
@@ -74,4 +81,34 @@ public static class FroggySfxSetup
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
     }
-}
+
+    public static void SetupHomeLogoButton()
+    {
+        GameObject logo = GameObject.Find("homeLogo");
+
+        if (logo == null)
+            return;
+
+        Transform existing = logo.transform.parent.Find("homeLogoButton");
+        GameObject buttonObject = existing == null ? new GameObject("homeLogoButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(UnityEngine.UI.Image), typeof(UnityEngine.UI.Button)) : existing.gameObject;
+        RectTransform logoRect = logo.GetComponent<RectTransform>();
+        RectTransform rect = buttonObject.GetComponent<RectTransform>();
+        rect.SetParent(logo.transform.parent, false);
+        rect.anchorMin = logoRect.anchorMin;
+        rect.anchorMax = logoRect.anchorMax;
+        rect.anchoredPosition = logoRect.anchoredPosition;
+        rect.sizeDelta = logoRect.sizeDelta;
+        rect.pivot = logoRect.pivot;
+        rect.localScale = logoRect.localScale;
+        rect.localRotation = logoRect.localRotation;
+        buttonObject.transform.SetSiblingIndex(logo.transform.GetSiblingIndex() + 1);
+
+        UnityEngine.UI.Image image = buttonObject.GetComponent<UnityEngine.UI.Image>();
+        image.color = new Color(1f, 1f, 1f, 0f);
+        image.raycastTarget = true;
+
+        UnityEngine.UI.Button button = buttonObject.GetComponent<UnityEngine.UI.Button>();
+        button.targetGraphic = image;
+        button.transition = UnityEngine.UI.Selectable.Transition.None;
+        EditorUtility.SetDirty(buttonObject);
+    }}

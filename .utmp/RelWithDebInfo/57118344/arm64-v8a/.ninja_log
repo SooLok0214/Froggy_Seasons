@@ -1,0 +1,10 @@
+# ninja log v5
+94	3703	8092280175040228	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	7cc127271a3c83ad
+55	3717	8092280175211616	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	3f870bf3eac07727
+2	3747	8092280175524960	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	30f4d25ea65ef62f
+149	3771	8092280175636241	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	442a5312db3e08d0
+37	3958	8092280177675711	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	abf986304658f696
+72	4179	8092280179919518	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	5437f1ce4936fef9
+122	4314	8092280181234520	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	a81738cd8620ce62
+21	4332	8092280181426736	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	3cf7a51ddb7f1491
+4332	4501	8092280183158632	C:/Users/Admin/Documents/DDM-sem5/Multimedia_Authoring2/ma2/Froggy Seasons/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/57118344/obj/arm64-v8a/libgame.so	cb05fa4cca7877a1

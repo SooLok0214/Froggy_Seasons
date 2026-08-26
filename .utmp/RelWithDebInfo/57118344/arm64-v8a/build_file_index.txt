@@ -1,0 +1,2 @@
+C:\Users\Admin\Documents\DDM-sem5\Multimedia_Authoring2\ma2\Froggy Seasons\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\CMakeLists.txt
+C:\Users\Admin\Documents\DDM-sem5\Multimedia_Authoring2\ma2\Froggy Seasons\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt

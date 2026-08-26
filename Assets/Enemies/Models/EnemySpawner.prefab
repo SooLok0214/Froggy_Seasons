@@ -45,10 +45,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   enemies:
-  - {fileID: 6045378781631996472, guid: 8e7bbfe9034ae404b80c8aa639555a96, type: 3}
-  - {fileID: 5536626341143053661, guid: a1a862e9a7167e646a0d925524fc33e9, type: 3}
-  - {fileID: 1054406148882768521, guid: ecfb2f5229228ce498ef455015f1edaf, type: 3}
-  - {fileID: 6161963372794374749, guid: 866675aa4820166468fdc47b97019791, type: 3}
+  - {fileID: 1717232688710020730, guid: 8cdbfc25ab9e2dd48b2d94788b8ce773, type: 3}
+  - {fileID: 4126491720301894353, guid: 89b31e3d76e7cdf48ac9f8935f1c94f4, type: 3}
+  - {fileID: 8152834368353769456, guid: ca27f2de10f2c48408eee1f4c6d1c9b0, type: 3}
+  - {fileID: 2783528891001899571, guid: 99f1badc2ef5a2f4d8ce5e50c76e7bff, type: 3}
   player: {fileID: 0}
   spawnTime: 0.2
   minSpawnDistance: 1

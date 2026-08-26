@@ -23,7 +23,14 @@ public class UIManager : MonoBehaviour
     public GameObject menuBack;
 
     public GameObject gameOverPanel;
+
+    // Gameplay UI
     public GameObject joystickObject;
+    public GameObject characterInfo;
+    public GameObject attackButton;
+    public GameObject scoreBar;
+    public GameObject gameplayEmpty;
+    public ThirdPersonCamera thirdPersonCamera;
 
     public bool gameStarted;
     public bool settingsOpenedFromHome;
@@ -74,7 +81,8 @@ public class UIManager : MonoBehaviour
             pauseResumeBtn.image.overrideSprite = pauseImg;
         }
 
-        SetActive(joystickObject, true);
+        ShowGameplayUI();
+        SetCameraGameplayControl(true);
     }
 
     public void PauseResume()
@@ -94,12 +102,12 @@ public class UIManager : MonoBehaviour
             SetActive(pauseMenu, true);
             SetActive(settingsPanel, false);
             SetActive(menuBack, false);
-            SetActive(joystickObject, false);
+            HideGameplayUI();
         }
         else
         {
             HidePauseUI();
-            SetActive(joystickObject, true);
+            ShowGameplayUI();
         }
     }
 
@@ -112,6 +120,7 @@ public class UIManager : MonoBehaviour
         SetActive(pauseMenu, false);
         SetActive(settingsPanel, true);
         SetActive(menuBack, true);
+        HideGameplayUI();
     }
 
     public void BackToPauseMenu()
@@ -121,12 +130,14 @@ public class UIManager : MonoBehaviour
             settingsOpenedFromHome = false;
             HidePauseUI();
             SetActive(homeMenu, true);
+            HideGameplayUI();
             return;
         }
 
         SetActive(pauseMenu, true);
         SetActive(settingsPanel, false);
         SetActive(menuBack, false);
+        HideGameplayUI();
     }
 
     public void OpenHomeSettings()
@@ -140,6 +151,7 @@ public class UIManager : MonoBehaviour
         SetActive(pauseMenu, false);
         SetActive(settingsPanel, true);
         SetActive(menuBack, true);
+        HideGameplayUI();
     }
 
     public void GameOver()
@@ -158,6 +170,9 @@ public class UIManager : MonoBehaviour
             musicManager.PlayGameOverMusic();
 
         HidePauseUI();
+        HideGameplayUI();
+        HideGameplayObjectsByName();
+        SetCameraGameplayControl(false);
 
         if (pauseResumeBtn != null)
         {
@@ -165,7 +180,6 @@ public class UIManager : MonoBehaviour
             pauseResumeBtn.image.overrideSprite = pauseImg;
         }
 
-        SetActive(joystickObject, false);
         SetActive(gameOverPanel, true);
 
         if (gameOverPanel != null)
@@ -197,14 +211,60 @@ public class UIManager : MonoBehaviour
         SetActive(gameOverPanel, false);
         SetActive(homeMenu, true);
         HidePauseUI();
+        HideGameplayUI();
+        SetCameraGameplayControl(false);
 
         if (pauseResumeBtn != null)
         {
             pauseResumeBtn.gameObject.SetActive(false);
             pauseResumeBtn.image.overrideSprite = pauseImg;
         }
+    }
 
+    public void ShowGameplayUI()
+    {
+        SetActive(joystickObject, true);
+        SetActive(characterInfo, true);
+        SetActive(attackButton, true);
+        SetActive(scoreBar, true);
+        SetActive(gameplayEmpty, true);
+    }
+
+    public void HideGameplayUI()
+    {
         SetActive(joystickObject, false);
+        SetActive(characterInfo, false);
+        SetActive(attackButton, false);
+        SetActive(scoreBar, false);
+        SetActive(gameplayEmpty, false);
+    }
+
+    public void HideGameplayObjectsByName()
+    {
+        string[] objectNames =
+        {
+            "infoBar",
+            "characterInfo",
+            "Crosshair",
+            "crosshair"
+        };
+
+        foreach (string objectName in objectNames)
+        {
+            GameObject target = GameObject.Find(objectName);
+
+            if (target != null)
+                target.SetActive(false);
+        }
+    }
+
+    public void SetCameraGameplayControl(bool active)
+    {
+        if (thirdPersonCamera == null)
+            thirdPersonCamera = FindAnyObjectByType<ThirdPersonCamera>();
+
+        if (thirdPersonCamera != null)
+            thirdPersonCamera.SetGameplayControl(active);
     }
 
     public void HidePauseUI()

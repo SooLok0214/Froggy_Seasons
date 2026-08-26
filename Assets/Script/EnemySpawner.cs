@@ -39,7 +39,7 @@ public class EnemySpawner : MonoBehaviour
         }
 
         if (FindObjectsByType<EnemyFollowPlayer>(
-            FindObjectsSortMode.None
+            FindObjectsInactive.Exclude
         ).Length >= maxEnemies)
         {
             return;

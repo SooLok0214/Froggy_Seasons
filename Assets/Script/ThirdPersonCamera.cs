@@ -9,6 +9,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
     public float distance = 5f;
     public float targetHeight = 1f;
+    public float horizontalOffset = 0f;
     public float touchSensitivity = 0.12f;
     public float mouseSensitivity = 0.08f;
     public float smoothSpeed = 12f;
@@ -19,6 +20,8 @@ public class ThirdPersonCamera : MonoBehaviour
     public float pitch = 20f;
     public int cameraTouchId = -1;
     public bool cameraTouching;
+    public bool controlsEnabled = true;
+    public bool crosshairVisible = true;
 
     public void OnEnable()
     {
@@ -39,8 +42,23 @@ public class ThirdPersonCamera : MonoBehaviour
 
     public void Update()
     {
+        if (!controlsEnabled)
+            return;
+
         TouchCameraControl();
         MouseCameraControl();
+    }
+
+    public void SetGameplayControl(bool active)
+    {
+        controlsEnabled = active;
+        crosshairVisible = active;
+
+        if (!active)
+        {
+            cameraTouchId = -1;
+            cameraTouching = false;
+        }
     }
 
     public void TouchCameraControl()
@@ -99,6 +117,7 @@ public class ThirdPersonCamera : MonoBehaviour
         Vector3 lookPosition = target.position + Vector3.up * targetHeight;
         Quaternion cameraRotation = Quaternion.Euler(pitch, yaw, 0);
         Vector3 targetPosition = lookPosition
+            + cameraRotation * Vector3.right * horizontalOffset
             - cameraRotation * Vector3.forward * distance;
 
         transform.position = Vector3.Lerp(
@@ -112,5 +131,31 @@ public class ThirdPersonCamera : MonoBehaviour
             cameraRotation,
             smoothSpeed * Time.unscaledDeltaTime
         );
+    }
+
+    public Color crosshairColor = Color.white;
+    public float crosshairSize = 20f;
+    public float crosshairThickness = 2f;
+
+    public void OnGUI()
+    {
+        if (!crosshairVisible)
+            return;
+
+        float scale = Mathf.Max(1f, Screen.height / 1080f);
+        float size = crosshairSize * scale;
+        float thickness = crosshairThickness * scale;
+        float centerX = Screen.width * 0.5f;
+        float centerY = Screen.height * 0.5f;
+
+        Color previousColor = GUI.color;
+        GUI.color = Color.black;
+        GUI.DrawTexture(new Rect(centerX - size * 0.5f - 1f, centerY - thickness * 0.5f - 1f, size + 2f, thickness + 2f), Texture2D.whiteTexture);
+        GUI.DrawTexture(new Rect(centerX - thickness * 0.5f - 1f, centerY - size * 0.5f - 1f, thickness + 2f, size + 2f), Texture2D.whiteTexture);
+
+        GUI.color = crosshairColor;
+        GUI.DrawTexture(new Rect(centerX - size * 0.5f, centerY - thickness * 0.5f, size, thickness), Texture2D.whiteTexture);
+        GUI.DrawTexture(new Rect(centerX - thickness * 0.5f, centerY - size * 0.5f, thickness, size), Texture2D.whiteTexture);
+        GUI.color = previousColor;
     }
 }

@@ -34,7 +34,7 @@ public class MusicManager : MonoBehaviour
     {
         if (instance != null && instance != this)
         {
-            instance.CopySceneUiReferences(this);
+            instance.CopySceneReferences(this);
             Destroy(gameObject);
             return;
         }
@@ -80,13 +80,33 @@ public class MusicManager : MonoBehaviour
         RegisterSceneTargets();
     }
 
-    public void CopySceneUiReferences(MusicManager sceneManager)
+    public void CopySceneReferences(MusicManager sceneManager)
     {
+        // 每個場景只需要更換 MusicManager 子物件上的 AudioClip。
+        // 保留下來的 MusicManager 會同步相對應的三首 BGM。
+        CopyBgmClip(sceneManager.homeBGM, homeBGM);
+        CopyBgmClip(sceneManager.inGameBGM, inGameBGM);
+        CopyBgmClip(sceneManager.gameOverBGM, gameOverBGM);
+
         if (sceneManager.bgmSlider != null)
             bgmSlider = sceneManager.bgmSlider;
 
         if (sceneManager.sfxSlider != null)
             sfxSlider = sceneManager.sfxSlider;
+    }
+
+    public void CopyBgmClip(AudioSource source, AudioSource target)
+    {
+        if (source == null || target == null || source.clip == null)
+            return;
+
+        bool wasPlaying = target.isPlaying;
+        target.clip = source.clip;
+        target.loop = source.loop;
+        target.playOnAwake = false;
+
+        if (wasPlaying)
+            target.Play();
     }
 
     public void EnsureSfxSource()
@@ -118,7 +138,7 @@ public class MusicManager : MonoBehaviour
 
         foreach (Button button in buttons)
         {
-            if (button.name != "homeLogo")
+            if (button.name != "homeLogoButton")
                 AddPointerEvent(button.transform, EventTriggerType.PointerDown, data => PlayButtonClick(), clickTargets);
         }
 
@@ -126,7 +146,7 @@ public class MusicManager : MonoBehaviour
 
         foreach (Transform sceneObject in sceneObjects)
         {
-            if (sceneObject.name == "homeLogo")
+            if (sceneObject.name == "homeLogoButton")
                 AddPointerEvent(sceneObject, EventTriggerType.PointerDown, data => PlayFrogCroak(), clickTargets);
 
             if (sceneObject.name == "musicBtn")
