@@ -16,14 +16,7 @@ public class EnemyHealth : MonoBehaviour
         if (isDead || damage <= 0f)
             return;
 
-        currentHealth -= damage;
-
-        if (currentHealth < 0f)
-            currentHealth = 0f;
-
-        Debug.Log(
-            name + " HP: " + currentHealth + " / " + maxHealth
-        );
+        currentHealth = Mathf.Max(0f, currentHealth - damage);
 
         if (currentHealth <= 0f)
             Die();

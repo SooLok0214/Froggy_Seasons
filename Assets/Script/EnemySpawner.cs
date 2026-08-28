@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
     public GameObject[] enemies;
     public Transform player;
+    public EnemyDifficultySettings difficultySettings;
 
     public float spawnTime = 5f;
     public float minSpawnDistance = 8f;
@@ -13,34 +15,36 @@ public class EnemySpawner : MonoBehaviour
 
     public int maxEnemies = 20;
 
-    public void Start()
-    {
-        if (player == null)
-        {
-            GameObject playerObject =
-                GameObject.FindGameObjectWithTag("Player");
+    public bool spawning;
+    public List<GameObject> spawnedEnemies = new List<GameObject>();
 
-            if (playerObject != null)
-            {
-                player = playerObject.transform;
-            }
-        }
+    public void StartSpawning()
+    {
+        CancelInvoke("SpawnEnemy");
+        spawning = true;
 
         InvokeRepeating("SpawnEnemy", 2f, spawnTime);
     }
 
+    public void StopSpawning()
+    {
+        spawning = false;
+        CancelInvoke("SpawnEnemy");
+    }
+
     public void SpawnEnemy()
     {
-        if (player == null ||
+        if (!spawning ||
+            player == null ||
             enemies == null ||
             enemies.Length == 0)
         {
             return;
         }
 
-        if (FindObjectsByType<EnemyFollowPlayer>(
-            FindObjectsInactive.Exclude
-        ).Length >= maxEnemies)
+        spawnedEnemies.RemoveAll(enemy => enemy == null);
+
+        if (spawnedEnemies.Count >= maxEnemies)
         {
             return;
         }
@@ -81,6 +85,8 @@ public class EnemySpawner : MonoBehaviour
                 Quaternion.identity
             );
 
+        spawnedEnemies.Add(enemy);
+
         EnemyFollowPlayer follow =
             enemy.GetComponent<EnemyFollowPlayer>();
 
@@ -91,5 +97,16 @@ public class EnemySpawner : MonoBehaviour
         }
 
         follow.player = player;
+
+        EnemyScaling scaling =
+            enemy.GetComponent<EnemyScaling>();
+
+        if (scaling == null)
+        {
+            scaling = enemy.AddComponent<EnemyScaling>();
+        }
+
+        scaling.settings = difficultySettings;
+        scaling.ApplyCurrentDifficulty();
     }
 }

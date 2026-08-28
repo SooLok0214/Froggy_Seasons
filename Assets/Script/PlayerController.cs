@@ -22,9 +22,6 @@ public class PlayerController : MonoBehaviour
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
 
-        if (gameCamera == null && Camera.main != null)
-            gameCamera = Camera.main.gameObject;
-
         if (rb != null)
             rb.angularDamping = 10f;
 

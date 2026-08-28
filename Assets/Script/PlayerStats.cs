@@ -10,13 +10,15 @@ public class PlayerStats : MonoBehaviour
     public float expToLevel = 100f;
     public float expPerKill = 10f;
 
-    public float attack = 10f;
+    public float attack = 25f;
     public float attackSpeed = 1f;
+    public float speedIncreaseEveryFiveLevels = 0.5f;
 
     public bool isDead = false;
 
     public ScoreManager scoreManager;
-    public UIManager uiManager;
+    public PlayerController playerController;
+    public LevelUpChoiceSystem levelUpChoiceSystem;
 
     public AudioSource audioSource;
     public AudioClip atkSFX;
@@ -27,19 +29,12 @@ public class PlayerStats : MonoBehaviour
         currentLevel = 1;
         currentExp = 0f;
 
-        if (scoreManager == null)
-        {
-            scoreManager = FindAnyObjectByType<ScoreManager>();
-        }
+        CacheReferences();
 
-        if (uiManager == null)
+        // 火球的基礎傷害是 25。舊場景若仍保存為 10，載入時同步更新。
+        if (attack < 25f)
         {
-            uiManager = FindAnyObjectByType<UIManager>();
-        }
-
-        if (audioSource == null)
-        {
-            audioSource = GetComponent<AudioSource>();
+            attack = 25f;
         }
 
         SyncLevelRecord();
@@ -52,19 +47,12 @@ public class PlayerStats : MonoBehaviour
             return;
         }
 
-        currentHealth -= damage;
-
-        if (currentHealth < 0f)
-        {
-            currentHealth = 0f;
-        }
+        currentHealth = Mathf.Max(0f, currentHealth - damage);
 
         if (audioSource != null && atkSFX != null)
         {
             audioSource.PlayOneShot(atkSFX);
         }
-
-        Debug.Log("Player HP: " + currentHealth + " / " + maxHealth);
 
         if (currentHealth <= 0f)
         {
@@ -79,12 +67,7 @@ public class PlayerStats : MonoBehaviour
             return;
         }
 
-        currentHealth += amount;
-
-        if (currentHealth > maxHealth)
-        {
-            currentHealth = maxHealth;
-        }
+        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
     }
 
     public void IncreaseMaxHealth(float amount)
@@ -122,20 +105,47 @@ public class PlayerStats : MonoBehaviour
     public void LevelUp()
     {
         currentLevel++;
+
+        if (currentLevel % 5 == 0)
+        {
+            if (playerController == null)
+                playerController = GetComponent<PlayerController>();
+
+            if (playerController != null)
+            {
+                playerController.speed += speedIncreaseEveryFiveLevels;
+            }
+        }
+
+        if (MusicManager.instance != null)
+        {
+            MusicManager.instance.PlayLevelUpSfx();
+        }
+
         SyncLevelRecord();
+
+        if (levelUpChoiceSystem != null)
+        {
+            levelUpChoiceSystem.ShowChoices(this);
+        }
     }
 
     public void SyncLevelRecord()
     {
-        if (scoreManager == null)
-        {
-            scoreManager = FindAnyObjectByType<ScoreManager>();
-        }
-
         if (scoreManager != null)
         {
             scoreManager.SetLevel(currentLevel);
         }
+    }
+
+    public void CacheReferences()
+    {
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
+
+        if (playerController == null)
+            playerController = GetComponent<PlayerController>();
+
     }
 
     public void Die()
@@ -147,9 +157,7 @@ public class PlayerStats : MonoBehaviour
 
         isDead = true;
 
-        if (uiManager != null)
-        {
-            uiManager.GameOver();
-        }
+        if (GameManager.instance != null)
+            GameManager.instance.GameOver();
     }
 }

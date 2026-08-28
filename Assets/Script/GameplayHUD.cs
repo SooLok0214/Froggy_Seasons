@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameplayHUD : MonoBehaviour
@@ -16,123 +15,27 @@ public class GameplayHUD : MonoBehaviour
     public Text liveKillsText;
     public Text liveTimeText;
     public Text healthText;
+    public Text levelText;
 
     public Font cinzelFont;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    public static void RegisterSceneConnection()
-    {
-        SceneManager.sceneLoaded -= AddGameplayHUD;
-        SceneManager.sceneLoaded += AddGameplayHUD;
-    }
-
-    public static void AddGameplayHUD(Scene scene, LoadSceneMode mode)
-    {
-        if (scene.name != UIManager.GameplayScene)
-        {
-            return;
-        }
-
-        ScoreManager manager = Object.FindAnyObjectByType<ScoreManager>();
-
-        if (manager != null && manager.GetComponent<GameplayHUD>() == null)
-        {
-            manager.gameObject.AddComponent<GameplayHUD>();
-        }
-    }
+    [System.NonSerialized] public int displayedKills = -1;
+    [System.NonSerialized] public int displayedTime = -1;
+    [System.NonSerialized] public float displayedHealth = -1f;
+    [System.NonSerialized] public float displayedMaxHealth = -1f;
+    [System.NonSerialized] public float displayedExp = -1f;
+    [System.NonSerialized] public float displayedExpTarget = -1f;
+    [System.NonSerialized] public int displayedLevel = -1;
 
     public void Start()
     {
-        FindConnections();
         BuildHUD();
         UpdateHUD();
     }
 
     public void Update()
     {
-        if (
-            scoreManager == null ||
-            playerStats == null ||
-            scoreBar == null ||
-            infoBar == null ||
-            healthLine == null ||
-            expLine == null
-        )
-        {
-            FindConnections();
-            BuildHUD();
-        }
-
         UpdateHUD();
-    }
-
-    public void FindConnections()
-    {
-        if (scoreManager == null)
-        {
-            scoreManager = Object.FindAnyObjectByType<ScoreManager>();
-        }
-
-        if (playerStats == null)
-        {
-            playerStats = Object.FindAnyObjectByType<PlayerStats>();
-        }
-
-        if (scoreBar == null)
-        {
-            scoreBar = FindRectTransform("scoreBar");
-        }
-
-        if (infoBar == null)
-        {
-            infoBar = FindRectTransform("infoBar");
-        }
-
-        if (healthLine == null)
-        {
-            healthLine = FindImage("healthLine");
-        }
-
-        if (expLine == null)
-        {
-            expLine = FindImage("expLine");
-        }
-
-        if (cinzelFont == null)
-        {
-            cinzelFont = Resources.Load<Font>("Fonts/Cinzel-Bold");
-        }
-    }
-
-    public RectTransform FindRectTransform(string objectName)
-    {
-        RectTransform[] rectTransforms =
-            Resources.FindObjectsOfTypeAll<RectTransform>();
-
-        foreach (RectTransform rectTransform in rectTransforms)
-        {
-            if (
-                rectTransform.name == objectName &&
-                rectTransform.gameObject.scene.IsValid()
-            )
-            {
-                return rectTransform;
-            }
-        }
-
-        return null;
-    }
-
-    public Image FindImage(string objectName)
-    {
-        RectTransform rectTransform = FindRectTransform(objectName);
-
-        if (rectTransform == null)
-        {
-            return null;
-        }
-
-        return rectTransform.GetComponent<Image>();
     }
 
     public void BuildHUD()
@@ -172,6 +75,16 @@ public class GameplayHUD : MonoBehaviour
                 new Vector2(1000f, 300f),
                 60,
                 new Color32(255, 250, 226, 255)
+            );
+
+            levelText = CreateText(
+                infoBar,
+                "LevelValue",
+                levelText,
+                new Vector2(-1195f, -185f),
+                new Vector2(260f, 150f),
+                92,
+                scoreColor
             );
         }
 
@@ -255,13 +168,17 @@ public class GameplayHUD : MonoBehaviour
     {
         if (scoreManager != null)
         {
-            if (liveKillsText != null)
+            if (liveKillsText != null && displayedKills != scoreManager.kills)
             {
+                displayedKills = scoreManager.kills;
                 liveKillsText.text = scoreManager.kills.ToString("D3");
             }
 
-            if (liveTimeText != null)
+            int currentSecond = Mathf.FloorToInt(scoreManager.survivalTime);
+
+            if (liveTimeText != null && displayedTime != currentSecond)
             {
+                displayedTime = currentSecond;
                 liveTimeText.text =
                     scoreManager.FormatTime(scoreManager.survivalTime);
             }
@@ -272,33 +189,51 @@ public class GameplayHUD : MonoBehaviour
             return;
         }
 
-        float healthPercent =
-            playerStats.currentHealth /
-            Mathf.Max(1f, playerStats.maxHealth);
+        bool healthChanged =
+            !Mathf.Approximately(displayedHealth, playerStats.currentHealth) ||
+            !Mathf.Approximately(displayedMaxHealth, playerStats.maxHealth);
 
-        float expPercent =
-            playerStats.currentExp /
-            Mathf.Max(1f, playerStats.expToLevel);
+        bool expChanged =
+            !Mathf.Approximately(displayedExp, playerStats.currentExp) ||
+            !Mathf.Approximately(displayedExpTarget, playerStats.expToLevel);
 
-        if (healthLine != null)
+        if (healthChanged)
         {
-            healthLine.fillAmount = Mathf.Clamp01(healthPercent);
+            displayedHealth = playerStats.currentHealth;
+            displayedMaxHealth = playerStats.maxHealth;
+
+            if (healthLine != null)
+            {
+                healthLine.fillAmount = Mathf.Clamp01(
+                    playerStats.currentHealth / Mathf.Max(1f, playerStats.maxHealth)
+                );
+            }
+
+            if (healthText != null)
+            {
+                int currentHealth = Mathf.CeilToInt(Mathf.Max(0f, playerStats.currentHealth));
+                int maximumHealth = Mathf.CeilToInt(Mathf.Max(1f, playerStats.maxHealth));
+                healthText.text = currentHealth + " / " + maximumHealth;
+            }
         }
 
-        if (expLine != null)
+        if (expChanged)
         {
-            expLine.fillAmount = Mathf.Clamp01(expPercent);
+            displayedExp = playerStats.currentExp;
+            displayedExpTarget = playerStats.expToLevel;
+
+            if (expLine != null)
+            {
+                expLine.fillAmount = Mathf.Clamp01(
+                    playerStats.currentExp / Mathf.Max(1f, playerStats.expToLevel)
+                );
+            }
         }
 
-        if (healthText != null)
+        if (levelText != null && displayedLevel != playerStats.currentLevel)
         {
-            int currentHealth =
-                Mathf.CeilToInt(Mathf.Max(0f, playerStats.currentHealth));
-
-            int maximumHealth =
-                Mathf.CeilToInt(Mathf.Max(1f, playerStats.maxHealth));
-
-            healthText.text = currentHealth + " / " + maximumHealth;
+            displayedLevel = playerStats.currentLevel;
+            levelText.text = playerStats.currentLevel.ToString();
         }
     }
 }

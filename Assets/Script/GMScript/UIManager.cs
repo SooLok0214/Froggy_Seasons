@@ -1,15 +1,8 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    public const string MainMenuScene = "Main_Use_Scene";
-    public const string GameplayScene = "InGameScene";
-
-    public MusicManager musicManager;
-    public ScoreManager scoreManager;
-
     public Button pauseResumeBtn;
     public Sprite pauseImg;
     public Sprite resumeImg;
@@ -30,45 +23,29 @@ public class UIManager : MonoBehaviour
     public GameObject attackButton;
     public GameObject scoreBar;
     public GameObject gameplayEmpty;
+    public GameObject crosshair;
     public ThirdPersonCamera thirdPersonCamera;
 
     public bool gameStarted;
     public bool settingsOpenedFromHome;
 
-    public void Start()
-    {
-        if (MusicManager.instance != null)
-            musicManager = MusicManager.instance;
-
-        if (scoreManager == null)
-            scoreManager = FindAnyObjectByType<ScoreManager>();
-
-        if (SceneManager.GetActiveScene().name == GameplayScene)
-            BeginGameplayScene();
-        else
-            ShowMainMenu();
-    }
-
     public void StartGame()
     {
-        Time.timeScale = 1;
-        SceneManager.LoadScene(GameplayScene);
+        if (GameManager.instance != null)
+            GameManager.instance.StartGame();
     }
 
     public void BeginGameplayScene()
     {
+        if (GameManager.instance != null)
+            GameManager.instance.GameStart();
+    }
+
+    // 只處理遊戲開始時的 UI，由 GameManager 呼叫。
+    public void GameStartUI()
+    {
         gameStarted = true;
         settingsOpenedFromHome = false;
-        Time.timeScale = 1;
-
-        if (scoreManager == null)
-            scoreManager = FindAnyObjectByType<ScoreManager>();
-
-        if (scoreManager != null)
-            scoreManager.StartScore();
-
-        if (musicManager != null)
-            musicManager.PlayInGameMusic();
 
         SetActive(startPanel, false);
         SetActive(homeMenu, false);
@@ -156,18 +133,15 @@ public class UIManager : MonoBehaviour
 
     public void GameOver()
     {
-        if (scoreManager == null)
-            scoreManager = FindAnyObjectByType<ScoreManager>();
+        if (GameManager.instance != null)
+            GameManager.instance.GameOver();
+    }
 
-        if (scoreManager != null)
-            scoreManager.StopScore();
-
+    // 只處理死亡時的 UI，由 GameManager 呼叫。
+    public void GameOverUI()
+    {
         gameStarted = false;
         settingsOpenedFromHome = false;
-        Time.timeScale = 0;
-
-        if (musicManager != null)
-            musicManager.PlayGameOverMusic();
 
         HidePauseUI();
         HideGameplayUI();
@@ -188,24 +162,21 @@ public class UIManager : MonoBehaviour
 
     public void BackToStartMenu()
     {
-        if (SceneManager.GetActiveScene().name == GameplayScene)
-        {
-            Time.timeScale = 1;
-            SceneManager.LoadScene(MainMenuScene);
-            return;
-        }
-
-        ShowMainMenu();
+        if (GameManager.instance != null)
+            GameManager.instance.BackToStartMenu();
     }
 
     public void ShowMainMenu()
     {
+        if (GameManager.instance != null)
+            GameManager.instance.ShowMainMenu();
+    }
+
+    // 只處理首頁 UI，由 GameManager 呼叫。
+    public void ShowMainMenuUI()
+    {
         gameStarted = false;
         settingsOpenedFromHome = false;
-        Time.timeScale = 1;
-
-        if (musicManager != null)
-            musicManager.PlayHomeMusic();
 
         SetActive(startPanel, true);
         SetActive(gameOverPanel, false);
@@ -241,28 +212,12 @@ public class UIManager : MonoBehaviour
 
     public void HideGameplayObjectsByName()
     {
-        string[] objectNames =
-        {
-            "infoBar",
-            "characterInfo",
-            "Crosshair",
-            "crosshair"
-        };
-
-        foreach (string objectName in objectNames)
-        {
-            GameObject target = GameObject.Find(objectName);
-
-            if (target != null)
-                target.SetActive(false);
-        }
+        SetActive(characterInfo, false);
+        SetActive(crosshair, false);
     }
 
     public void SetCameraGameplayControl(bool active)
     {
-        if (thirdPersonCamera == null)
-            thirdPersonCamera = FindAnyObjectByType<ThirdPersonCamera>();
-
         if (thirdPersonCamera != null)
             thirdPersonCamera.SetGameplayControl(active);
     }

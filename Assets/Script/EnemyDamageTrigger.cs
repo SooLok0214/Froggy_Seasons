@@ -14,30 +14,12 @@ public class EnemyDamageTrigger : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player"))
-            return;
-
-        PlayerStats playerStats =
-            other.GetComponent<PlayerStats>();
-
-        if (playerStats == null)
-            return;
-
-        enemyDamage.StartDamage(playerStats);
+        StartPlayerDamage(other);
     }
 
     public void OnTriggerStay(Collider other)
     {
-        if (!other.CompareTag("Player"))
-            return;
-
-        PlayerStats playerStats =
-            other.GetComponent<PlayerStats>();
-
-        if (playerStats == null)
-            return;
-
-        enemyDamage.StartDamage(playerStats);
+        StartPlayerDamage(other);
     }
 
     public void OnTriggerExit(Collider other)
@@ -46,5 +28,18 @@ public class EnemyDamageTrigger : MonoBehaviour
             return;
 
         enemyDamage.StopDamage();
+    }
+
+    public void StartPlayerDamage(Collider other)
+    {
+        if (enemyDamage == null ||
+            enemyDamage.touchingPlayer ||
+            !other.CompareTag("Player"))
+            return;
+
+        PlayerStats playerStats = other.GetComponent<PlayerStats>();
+
+        if (playerStats != null)
+            enemyDamage.StartDamage(playerStats);
     }
 }

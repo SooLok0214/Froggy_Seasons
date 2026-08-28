@@ -2,14 +2,10 @@ using UnityEngine;
 
 public class Deadplace : MonoBehaviour
 {
+    // 保留給既有 FroggyPlayerSetup Editor 工具指定；
+    // 實際死亡流程統一交給 GameManager。
     public UIManager uiManager;
     public bool deathTriggered;
-
-    public void Start()
-    {
-        if (uiManager == null)
-            uiManager = FindAnyObjectByType<UIManager>();
-    }
 
     public void OnTriggerEnter(Collider other)
     {
@@ -18,10 +14,7 @@ public class Deadplace : MonoBehaviour
 
         deathTriggered = true;
 
-        if (uiManager == null)
-            uiManager = FindAnyObjectByType<UIManager>();
-
-        if (uiManager != null)
-            uiManager.GameOver();
+        if (GameManager.instance != null)
+            GameManager.instance.GameOver();
     }
 }

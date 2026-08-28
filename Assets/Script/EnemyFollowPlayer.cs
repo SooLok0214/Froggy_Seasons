@@ -15,21 +15,11 @@ public class EnemyFollowPlayer : MonoBehaviour
     public float separationStrength = 2f;
 
     public Rigidbody rb;
+    [System.NonSerialized] public Collider[] nearbyColliders = new Collider[64];
 
     public void Start()
     {
         rb = GetComponent<Rigidbody>();
-
-        if (player == null)
-        {
-            GameObject playerObject =
-                GameObject.FindGameObjectWithTag("Player");
-
-            if (playerObject != null)
-            {
-                player = playerObject.transform;
-            }
-        }
 
         if (rb != null)
         {
@@ -81,14 +71,16 @@ public class EnemyFollowPlayer : MonoBehaviour
 
         Vector3 separation = Vector3.zero;
 
-        Collider[] nearbyEnemies =
-            Physics.OverlapSphere(
-                transform.position,
-                separationRadius
-            );
+        int nearbyCount = Physics.OverlapSphereNonAlloc(
+            transform.position,
+            separationRadius,
+            nearbyColliders
+        );
 
-        foreach (Collider col in nearbyEnemies)
+        for (int i = 0; i < nearbyCount; i++)
         {
+            Collider col = nearbyColliders[i];
+
             if (col.gameObject == gameObject)
                 continue;
 

@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -23,34 +25,28 @@ public class PlayerAttack : MonoBehaviour
 
     [InspectorName("前後位置 (Z)")]
     public float fireballForwardBack = 0.45f;
+
+    [Header("Hold Attack")]
+    public bool isHoldingAttack;
     public float nextFireTime;
+    public EventTrigger attackEventTrigger;
+    public EventTrigger.Entry attackPointerDownEntry;
+    public EventTrigger.Entry attackPointerUpEntry;
+    public EventTrigger.Entry attackPointerExitEntry;
+    public PlayerStats playerStats;
 
     public void Start()
     {
-        if (aimCamera == null)
-            aimCamera = Camera.main;
+        playerStats = GetComponent<PlayerStats>();
 
-        if (attackButton == null)
-        {
-            Button[] buttons = Resources.FindObjectsOfTypeAll<Button>();
-
-            foreach (Button button in buttons)
-            {
-                if (button.gameObject.scene.IsValid() &&
-                    button.name == "attackButton")
-                {
-                    attackButton = button;
-                    break;
-                }
-            }
-        }
-
-        if (attackButton != null)
-            attackButton.onClick.AddListener(Fire);
+        SetupHoldAttack();
     }
 
     public void Update()
     {
+        if (isHoldingAttack)
+            Fire();
+
         if (Keyboard.current != null &&
             Keyboard.current.spaceKey.wasPressedThisFrame)
         {
@@ -58,10 +54,75 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
+    public void SetupHoldAttack()
+    {
+        if (attackButton == null)
+            return;
+
+        attackEventTrigger = attackButton.GetComponent<EventTrigger>();
+
+        if (attackEventTrigger == null)
+            attackEventTrigger = attackButton.gameObject.AddComponent<EventTrigger>();
+
+        if (attackEventTrigger.triggers == null)
+            attackEventTrigger.triggers = new List<EventTrigger.Entry>();
+
+        attackPointerDownEntry = CreateTriggerEntry(
+            EventTriggerType.PointerDown,
+            OnAttackPointerDown
+        );
+        attackEventTrigger.triggers.Add(attackPointerDownEntry);
+
+        attackPointerUpEntry = CreateTriggerEntry(
+            EventTriggerType.PointerUp,
+            OnAttackPointerUp
+        );
+        attackEventTrigger.triggers.Add(attackPointerUpEntry);
+
+        attackPointerExitEntry = CreateTriggerEntry(
+            EventTriggerType.PointerExit,
+            OnAttackPointerUp
+        );
+        attackEventTrigger.triggers.Add(attackPointerExitEntry);
+    }
+
+    public EventTrigger.Entry CreateTriggerEntry(
+        EventTriggerType eventType,
+        UnityEngine.Events.UnityAction<BaseEventData> action
+    )
+    {
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = eventType;
+        entry.callback.AddListener(action);
+        return entry;
+    }
+
+    public void OnAttackPointerDown(BaseEventData eventData)
+    {
+        isHoldingAttack = true;
+        Fire();
+    }
+
+    public void OnAttackPointerUp(BaseEventData eventData)
+    {
+        isHoldingAttack = false;
+    }
+
+    public void OnDisable()
+    {
+        isHoldingAttack = false;
+    }
+
     public void OnDestroy()
     {
-        if (attackButton != null)
-            attackButton.onClick.RemoveListener(Fire);
+        isHoldingAttack = false;
+
+        if (attackEventTrigger == null || attackEventTrigger.triggers == null)
+            return;
+
+        attackEventTrigger.triggers.Remove(attackPointerDownEntry);
+        attackEventTrigger.triggers.Remove(attackPointerUpEntry);
+        attackEventTrigger.triggers.Remove(attackPointerExitEntry);
     }
 
     public void Fire()
@@ -69,16 +130,10 @@ public class PlayerAttack : MonoBehaviour
         if (Time.time < nextFireTime)
             return;
 
-        PlayerStats stats = GetComponent<PlayerStats>();
-
-        if (stats != null && stats.isDead)
+        if (playerStats != null && playerStats.isDead)
             return;
 
         nextFireTime = Time.time + fireCooldown;
-        PlayerController playerController = GetComponent<PlayerController>();
-
-        if (playerController != null)
-            playerController.MagicHeal();
 
         Vector3 direction = transform.forward;
 
@@ -128,20 +183,15 @@ public class PlayerAttack : MonoBehaviour
             projectile.AddComponent<MagicProjectile>();
 
         magicProjectile.owner = gameObject;
-        magicProjectile.damage = projectileDamage;
+        magicProjectile.damage = playerStats != null
+            ? playerStats.attack
+            : projectileDamage;
         magicProjectile.lifeTime = projectileLifetime;
         magicProjectile.fireColor = fireColor;
         magicProjectile.BuildFireLook();
+
+        if (MusicManager.instance != null)
+            MusicManager.instance.PlayFireSfx();
     }
 
-    [RuntimeInitializeOnLoadMethod(
-        RuntimeInitializeLoadType.AfterSceneLoad
-    )]
-    public static void AddAttackToPlayer()
-    {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-
-        if (player != null && player.GetComponent<PlayerAttack>() == null)
-            player.AddComponent<PlayerAttack>();
-    }
 }

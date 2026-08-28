@@ -1,37 +1,32 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.EventSystems;
-using UnityEngine.Events;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MusicManager : MonoBehaviour
 {
     public static MusicManager instance;
 
-    public AudioSource homeBGM;
-    public AudioSource inGameBGM;
-    public AudioSource gameOverBGM;
+    [System.NonSerialized] public AudioSource homeBGM;
+    [System.NonSerialized] public AudioSource inGameBGM;
+    [System.NonSerialized] public AudioSource gameOverBGM;
 
     public AudioMixer mixer;
     public Slider bgmSlider;
     public Slider sfxSlider;
+    public GameManager sceneGameManager;
 
-    public AudioSource sfxSource;
-    public AudioClip buttonClickSfx;
-    public AudioClip frogCroakSfx;
-    public AudioMixerGroup sfxMixerGroup;
+    [System.NonSerialized] public AudioSource buttonClickSfx;
+    [System.NonSerialized] public AudioSource frogCroakSfx;
+    [System.NonSerialized] public AudioSource fireSfx;
+    [System.NonSerialized] public AudioSource levelUpSfx;
 
     public bool bgmMuted;
     public bool sfxMuted;
 
-    [System.NonSerialized] public HashSet<Transform> clickTargets = new HashSet<Transform>();
-    [System.NonSerialized] public HashSet<Transform> muteTargets = new HashSet<Transform>();
-    [System.NonSerialized] public HashSet<Slider> sliderTargets = new HashSet<Slider>();
-
     public void Awake()
     {
+        ConnectAudioChildren();
+
         if (instance != null && instance != this)
         {
             instance.CopySceneReferences(this);
@@ -41,8 +36,9 @@ public class MusicManager : MonoBehaviour
 
         instance = this;
         DontDestroyOnLoad(gameObject);
-        EnsureSfxSource();
-        SceneManager.sceneLoaded += OnSceneLoaded;
+
+        if (sceneGameManager != null)
+            sceneGameManager.musicManager = this;
     }
 
     public void Start()
@@ -62,7 +58,6 @@ public class MusicManager : MonoBehaviour
         ApplyBgmVolume();
         ApplySfxVolume();
         BindSliders();
-        RegisterSceneTargets();
     }
 
     public void OnDestroy()
@@ -70,121 +65,89 @@ public class MusicManager : MonoBehaviour
         if (instance != this)
             return;
 
-        SceneManager.sceneLoaded -= OnSceneLoaded;
         instance = null;
-    }
-
-    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        BindSliders();
-        RegisterSceneTargets();
     }
 
     public void CopySceneReferences(MusicManager sceneManager)
     {
-        // 每個場景只需要更換 MusicManager 子物件上的 AudioClip。
-        // 保留下來的 MusicManager 會同步相對應的三首 BGM。
-        CopyBgmClip(sceneManager.homeBGM, homeBGM);
-        CopyBgmClip(sceneManager.inGameBGM, inGameBGM);
-        CopyBgmClip(sceneManager.gameOverBGM, gameOverBGM);
-
         if (sceneManager.bgmSlider != null)
             bgmSlider = sceneManager.bgmSlider;
 
         if (sceneManager.sfxSlider != null)
             sfxSlider = sceneManager.sfxSlider;
+
+        if (sceneManager.sceneGameManager != null)
+        {
+            sceneGameManager = sceneManager.sceneGameManager;
+            sceneGameManager.musicManager = this;
+        }
+
+        BindSliders();
     }
 
-    public void CopyBgmClip(AudioSource source, AudioSource target)
+    public void ConnectAudioChildren()
     {
-        if (source == null || target == null || source.clip == null)
+        homeBGM = FindAudioSource("BGM-Home");
+        inGameBGM = FindAudioSource("BGM-InGame");
+        gameOverBGM = FindAudioSource("BGM-GameOver");
+        buttonClickSfx = FindAudioSource("SFX-Click");
+        frogCroakSfx = FindAudioSource("SFX-FrogCroak");
+        fireSfx = FindAudioSource("SFX-Fire");
+        levelUpSfx = FindAudioSource("SFX-LevelUp");
+
+        AudioMixerGroup bgmGroup = FindMixerGroup("BGM");
+        AudioMixerGroup sfxGroup = FindMixerGroup("SFX");
+
+        SetupAudioSource(homeBGM, bgmGroup, true);
+        SetupAudioSource(inGameBGM, bgmGroup, true);
+        SetupAudioSource(gameOverBGM, bgmGroup, false);
+        SetupAudioSource(buttonClickSfx, sfxGroup, false);
+        SetupAudioSource(frogCroakSfx, sfxGroup, false);
+        SetupAudioSource(fireSfx, sfxGroup, false);
+        SetupAudioSource(levelUpSfx, sfxGroup, false);
+    }
+
+    public AudioSource FindAudioSource(string childName)
+    {
+        Transform child = transform.Find(childName);
+        return child == null ? null : child.GetComponent<AudioSource>();
+    }
+
+    public AudioMixerGroup FindMixerGroup(string groupName)
+    {
+        if (mixer == null)
+            return null;
+
+        AudioMixerGroup[] groups = mixer.FindMatchingGroups(groupName);
+        return groups.Length == 0 ? null : groups[0];
+    }
+
+    public void SetupAudioSource(AudioSource source, AudioMixerGroup group, bool loop)
+    {
+        if (source == null)
             return;
 
-        bool wasPlaying = target.isPlaying;
-        target.clip = source.clip;
-        target.loop = source.loop;
-        target.playOnAwake = false;
+        source.playOnAwake = false;
+        source.loop = loop;
+        source.spatialBlend = 0f;
 
-        if (wasPlaying)
-            target.Play();
-    }
-
-    public void EnsureSfxSource()
-    {
-        if (sfxSource == null)
-            sfxSource = GetComponent<AudioSource>();
-
-        if (sfxSource == null)
-            sfxSource = gameObject.AddComponent<AudioSource>();
-
-        sfxSource.playOnAwake = false;
-        sfxSource.loop = false;
-        sfxSource.spatialBlend = 0f;
-        sfxSource.outputAudioMixerGroup = sfxMixerGroup;
+        if (group != null)
+            source.outputAudioMixerGroup = group;
     }
 
     public void BindSliders()
     {
-        if (bgmSlider != null && sliderTargets.Add(bgmSlider))
+        if (bgmSlider != null)
+        {
+            bgmSlider.onValueChanged.RemoveListener(SetBgmVol);
             bgmSlider.onValueChanged.AddListener(SetBgmVol);
+        }
 
-        if (sfxSlider != null && sliderTargets.Add(sfxSlider))
+        if (sfxSlider != null)
+        {
+            sfxSlider.onValueChanged.RemoveListener(SetSfxVol);
             sfxSlider.onValueChanged.AddListener(SetSfxVol);
-    }
-
-    public void RegisterSceneTargets()
-    {
-        Button[] buttons = Object.FindObjectsByType<Button>(FindObjectsInactive.Include);
-
-        foreach (Button button in buttons)
-        {
-            if (button.name != "homeLogoButton")
-                AddPointerEvent(button.transform, EventTriggerType.PointerDown, data => PlayButtonClick(), clickTargets);
         }
-
-        Transform[] sceneObjects = Object.FindObjectsByType<Transform>(FindObjectsInactive.Include);
-
-        foreach (Transform sceneObject in sceneObjects)
-        {
-            if (sceneObject.name == "homeLogoButton")
-                AddPointerEvent(sceneObject, EventTriggerType.PointerDown, data => PlayFrogCroak(), clickTargets);
-
-            if (sceneObject.name == "musicBtn")
-            {
-                AddPointerEvent(sceneObject, EventTriggerType.PointerDown, data => PlayButtonClick(), clickTargets);
-                AddPointerEvent(sceneObject, EventTriggerType.PointerClick, data => ToggleBgmMute(), muteTargets);
-            }
-
-            if (sceneObject.name == "SFXbtn")
-            {
-                AddPointerEvent(sceneObject, EventTriggerType.PointerDown, data => PlayButtonClick(), clickTargets);
-                AddPointerEvent(sceneObject, EventTriggerType.PointerClick, data => ToggleSfxMute(), muteTargets);
-            }
-        }
-    }
-
-    public void AddPointerEvent(Transform target, EventTriggerType eventType, UnityAction<BaseEventData> action, HashSet<Transform> targets)
-    {
-        if (!targets.Add(target))
-            return;
-
-        Graphic graphic = target.GetComponent<Graphic>();
-
-        if (graphic != null)
-            graphic.raycastTarget = true;
-
-        EventTrigger trigger = target.GetComponent<EventTrigger>();
-
-        if (trigger == null)
-            trigger = target.gameObject.AddComponent<EventTrigger>();
-
-        if (trigger.triggers == null)
-            trigger.triggers = new List<EventTrigger.Entry>();
-
-        EventTrigger.Entry entry = new EventTrigger.Entry();
-        entry.eventID = eventType;
-        entry.callback.AddListener(action);
-        trigger.triggers.Add(entry);
     }
 
     public void PlayHomeMusic()
@@ -232,10 +195,27 @@ public class MusicManager : MonoBehaviour
         PlaySfx(frogCroakSfx);
     }
 
+    public void PlayFireSfx()
+    {
+        PlaySfx(fireSfx);
+    }
+
+    public void PlayLevelUpSfx()
+    {
+        PlaySfx(levelUpSfx);
+    }
+
     public void PlaySfx(AudioClip clip)
     {
-        if (sfxSource != null && clip != null)
-            sfxSource.PlayOneShot(clip);
+        // 保留此方法供舊的 Unity Button OnClick 連接使用。
+        if (buttonClickSfx != null && clip != null)
+            buttonClickSfx.PlayOneShot(clip);
+    }
+
+    public void PlaySfx(AudioSource source)
+    {
+        if (source != null && source.clip != null)
+            source.PlayOneShot(source.clip);
     }
 
     public void SetBgmVol(float val)
@@ -279,7 +259,9 @@ public class MusicManager : MonoBehaviour
 
         if (!sfxMuted)
         {
-            sfxSource.Stop();
+            if (buttonClickSfx != null)
+                buttonClickSfx.Stop();
+
             PlayButtonClick();
         }
     }

@@ -30,6 +30,8 @@ public class ScoreManager : MonoBehaviour
     public int currentLevel = 1;
 
     public bool recording;
+    public PlayerStats playerStats;
+    public int displayedSurvivalSecond = -1;
 
 
     public void Awake()
@@ -52,7 +54,15 @@ public class ScoreManager : MonoBehaviour
 
         survivalTime += Time.deltaTime;
 
-        UpdateScoreDisplay();
+        int survivalSecond = Mathf.FloorToInt(survivalTime);
+
+        if (survivalSecond != displayedSurvivalSecond)
+        {
+            displayedSurvivalSecond = survivalSecond;
+
+            if (survivalText != null)
+                survivalText.text = FormatTime(survivalTime);
+        }
     }
 
 
@@ -63,6 +73,7 @@ public class ScoreManager : MonoBehaviour
         currentLevel = 1;
 
         recording = true;
+        displayedSurvivalSecond = -1;
 
         UpdateScoreDisplay();
     }
@@ -115,8 +126,6 @@ public class ScoreManager : MonoBehaviour
 
         kills++;
 
-        PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
-
         if (playerStats != null)
         {
             playerStats.AddExperience(playerStats.expPerKill);
@@ -147,14 +156,7 @@ public class ScoreManager : MonoBehaviour
     public void BuildScoreDisplay()
     {
         if (scorePanel == null)
-            scorePanel = FindScorePanel();
-
-        if (scorePanel == null)
             return;
-
-
-        if (cinzelFont == null)
-            cinzelFont = Resources.Load<Font>("Fonts/Cinzel-Bold");
 
 
         // =========================
@@ -218,26 +220,6 @@ public class ScoreManager : MonoBehaviour
             22,
             200
         );
-    }
-
-
-    public RectTransform FindScorePanel()
-    {
-        RectTransform[] rects =
-            Resources.FindObjectsOfTypeAll<RectTransform>();
-
-
-        foreach (RectTransform rect in rects)
-        {
-            if (rect.gameObject.scene.IsValid() &&
-                rect.name == "endScorePanel")
-            {
-                return rect;
-            }
-        }
-
-
-        return null;
     }
 
 
