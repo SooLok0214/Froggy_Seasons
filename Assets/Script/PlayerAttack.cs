@@ -2,12 +2,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
 using UnityEngine.EventSystems;
 
 public class PlayerAttack : MonoBehaviour
 {
     public Button attackButton;
+    [InspectorName("攻擊觸控範圍 (Canvas)")]
+    public Button attackTouchAreaButton;
     public Camera aimCamera;
 
     public float projectileSpeed = 18f;
@@ -31,30 +32,10 @@ public class PlayerAttack : MonoBehaviour
     public bool isHoldingAttack;
     public bool buttonHoldingAttack;
 
-    [Header("Attack Touch Area (0 - 1 Screen)")]
-    public bool useAttackTouchArea = true;
-
-    [Range(0f, 1f)]
-    [InspectorName("左邊界 (Left)")]
-    public float attackAreaLeft = 0.5f;
-
-    [Range(0f, 1f)]
-    [InspectorName("右邊界 (Right)")]
-    public float attackAreaRight = 1f;
-
-    [Range(0f, 1f)]
-    [InspectorName("下邊界 (Bottom)")]
-    public float attackAreaBottom = 0f;
-
-    [Range(0f, 1f)]
-    [InspectorName("上邊界 (Top)")]
-    public float attackAreaTop = 1f;
-
     public float nextFireTime;
-    public EventTrigger attackEventTrigger;
-    public EventTrigger.Entry attackPointerDownEntry;
-    public EventTrigger.Entry attackPointerUpEntry;
-    public EventTrigger.Entry attackPointerExitEntry;
+    public List<EventTrigger> attackEventTriggers = new List<EventTrigger>();
+    public List<EventTrigger.Entry> attackTriggerEntries =
+        new List<EventTrigger.Entry>();
     public PlayerStats playerStats;
 
     public void Start()
@@ -66,7 +47,14 @@ public class PlayerAttack : MonoBehaviour
 
     public void Update()
     {
-        isHoldingAttack = buttonHoldingAttack || IsAttackAreaPressed();
+        if (Time.timeScale <= 0f)
+        {
+            isHoldingAttack = false;
+            buttonHoldingAttack = false;
+            return;
+        }
+
+        isHoldingAttack = buttonHoldingAttack;
 
         if (isHoldingAttack)
             Fire();
@@ -80,34 +68,47 @@ public class PlayerAttack : MonoBehaviour
 
     public void SetupHoldAttack()
     {
-        if (attackButton == null)
+        AddHoldEvents(attackButton);
+
+        if (attackTouchAreaButton != attackButton)
+            AddHoldEvents(attackTouchAreaButton);
+    }
+
+    public void AddHoldEvents(Button button)
+    {
+        if (button == null)
             return;
 
-        attackEventTrigger = attackButton.GetComponent<EventTrigger>();
+        EventTrigger trigger = button.GetComponent<EventTrigger>();
 
-        if (attackEventTrigger == null)
-            attackEventTrigger = attackButton.gameObject.AddComponent<EventTrigger>();
+        if (trigger == null)
+            trigger = button.gameObject.AddComponent<EventTrigger>();
 
-        if (attackEventTrigger.triggers == null)
-            attackEventTrigger.triggers = new List<EventTrigger.Entry>();
+        if (trigger.triggers == null)
+            trigger.triggers = new List<EventTrigger.Entry>();
 
-        attackPointerDownEntry = CreateTriggerEntry(
+        EventTrigger.Entry pointerDown = CreateTriggerEntry(
             EventTriggerType.PointerDown,
             OnAttackPointerDown
         );
-        attackEventTrigger.triggers.Add(attackPointerDownEntry);
+        trigger.triggers.Add(pointerDown);
 
-        attackPointerUpEntry = CreateTriggerEntry(
+        EventTrigger.Entry pointerUp = CreateTriggerEntry(
             EventTriggerType.PointerUp,
             OnAttackPointerUp
         );
-        attackEventTrigger.triggers.Add(attackPointerUpEntry);
+        trigger.triggers.Add(pointerUp);
 
-        attackPointerExitEntry = CreateTriggerEntry(
+        EventTrigger.Entry pointerExit = CreateTriggerEntry(
             EventTriggerType.PointerExit,
             OnAttackPointerUp
         );
-        attackEventTrigger.triggers.Add(attackPointerExitEntry);
+        trigger.triggers.Add(pointerExit);
+
+        attackEventTriggers.Add(trigger);
+        attackTriggerEntries.Add(pointerDown);
+        attackTriggerEntries.Add(pointerUp);
+        attackTriggerEntries.Add(pointerExit);
     }
 
     public EventTrigger.Entry CreateTriggerEntry(
@@ -123,6 +124,9 @@ public class PlayerAttack : MonoBehaviour
 
     public void OnAttackPointerDown(BaseEventData eventData)
     {
+        if (Time.timeScale <= 0f)
+            return;
+
         buttonHoldingAttack = true;
         Fire();
     }
@@ -130,44 +134,6 @@ public class PlayerAttack : MonoBehaviour
     public void OnAttackPointerUp(BaseEventData eventData)
     {
         buttonHoldingAttack = false;
-    }
-
-    public bool IsAttackAreaPressed()
-    {
-        if (Time.timeScale <= 0f ||
-            !useAttackTouchArea || attackButton == null ||
-            !attackButton.gameObject.activeInHierarchy ||
-            !attackButton.interactable)
-            return false;
-
-        if (Touchscreen.current != null)
-        {
-            foreach (TouchControl touch in Touchscreen.current.touches)
-            {
-                if (touch.press.isPressed &&
-                    IsInsideAttackArea(touch.position.ReadValue()))
-                    return true;
-            }
-        }
-
-        return Mouse.current != null &&
-            Mouse.current.leftButton.isPressed &&
-            IsInsideAttackArea(Mouse.current.position.ReadValue());
-    }
-
-    public bool IsInsideAttackArea(Vector2 screenPosition)
-    {
-        if (Screen.width <= 0 || Screen.height <= 0)
-            return false;
-
-        float x = screenPosition.x / Screen.width;
-        float y = screenPosition.y / Screen.height;
-        float left = Mathf.Min(attackAreaLeft, attackAreaRight);
-        float right = Mathf.Max(attackAreaLeft, attackAreaRight);
-        float bottom = Mathf.Min(attackAreaBottom, attackAreaTop);
-        float top = Mathf.Max(attackAreaBottom, attackAreaTop);
-
-        return x >= left && x <= right && y >= bottom && y <= top;
     }
 
     public void OnDisable()
@@ -181,12 +147,34 @@ public class PlayerAttack : MonoBehaviour
         isHoldingAttack = false;
         buttonHoldingAttack = false;
 
-        if (attackEventTrigger == null || attackEventTrigger.triggers == null)
+        foreach (EventTrigger trigger in attackEventTriggers)
+        {
+            if (trigger == null || trigger.triggers == null)
+                continue;
+
+            trigger.triggers.RemoveAll(
+                entry => attackTriggerEntries.Contains(entry)
+            );
+        }
+    }
+
+    public void OnDrawGizmos()
+    {
+        if (attackTouchAreaButton == null)
             return;
 
-        attackEventTrigger.triggers.Remove(attackPointerDownEntry);
-        attackEventTrigger.triggers.Remove(attackPointerUpEntry);
-        attackEventTrigger.triggers.Remove(attackPointerExitEntry);
+        RectTransform area =
+            attackTouchAreaButton.transform as RectTransform;
+
+        if (area == null)
+            return;
+
+        Vector3[] corners = new Vector3[4];
+        area.GetWorldCorners(corners);
+        Gizmos.color = new Color(1f, 0.55f, 0f, 0.9f);
+
+        for (int i = 0; i < 4; i++)
+            Gizmos.DrawLine(corners[i], corners[(i + 1) % 4]);
     }
 
     public void Fire()
