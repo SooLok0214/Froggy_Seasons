@@ -40,12 +40,10 @@ public static class InspectorReferenceSetup
         ScoreManager scoreManager = FindComponent<ScoreManager>(scene);
         MusicManager musicManager = FindComponent<MusicManager>(scene);
         EnemySpawner enemySpawner = FindComponent<EnemySpawner>(scene);
-        LevelUpChoiceSystem levelSystem = FindComponent<LevelUpChoiceSystem>(scene);
         PlayerStats playerStats = FindComponent<PlayerStats>(scene);
         PlayerController playerController = FindComponent<PlayerController>(scene);
         PlayerAttack playerAttack = FindComponent<PlayerAttack>(scene);
         ThirdPersonCamera thirdPersonCamera = FindComponent<ThirdPersonCamera>(scene);
-        EnemyDifficultySettings difficultySettings = FindComponent<EnemyDifficultySettings>(scene);
         Canvas rootCanvas = FindRootCanvas(scene);
 
         if (gameManager != null)
@@ -54,7 +52,6 @@ public static class InspectorReferenceSetup
             gameManager.scoreManager = scoreManager;
             gameManager.musicManager = musicManager;
             gameManager.enemySpawner = enemySpawner;
-            gameManager.levelUpChoiceSystem = levelSystem;
             EditorUtility.SetDirty(gameManager);
         }
 
@@ -70,10 +67,22 @@ public static class InspectorReferenceSetup
         {
             uiManager.thirdPersonCamera = thirdPersonCamera;
             uiManager.crosshair = FindObject(scene, "Crosshair", "crosshair");
+            uiManager.scoreManager = scoreManager;
+            uiManager.playerStats = playerStats;
+            uiManager.rootCanvas = rootCanvas;
 
             GameObject infoBar = FindObject(scene, "infoBar");
             if (infoBar != null)
                 uiManager.characterInfo = infoBar;
+
+            uiManager.scoreBarRect = FindRect(scene, "scoreBar");
+            uiManager.infoBarRect = FindRect(scene, "infoBar");
+            uiManager.healthLine = FindComponentByName<Image>(scene, "healthLine");
+            uiManager.expLine = FindComponentByName<Image>(scene, "expLine");
+            uiManager.cinzelFont = FindCinzelFont();
+            uiManager.BuildHUD();
+            uiManager.BuildLevelUpUI();
+            uiManager.SetLevelUpOverlayActive(false);
 
             EditorUtility.SetDirty(uiManager);
         }
@@ -86,35 +95,13 @@ public static class InspectorReferenceSetup
             scoreManager.BuildScoreDisplay();
             EditorUtility.SetDirty(scoreManager);
 
-            GameplayHUD hud = scoreManager.GetComponent<GameplayHUD>();
-            if (hud == null)
-                hud = scoreManager.gameObject.AddComponent<GameplayHUD>();
-
-            hud.scoreManager = scoreManager;
-            hud.playerStats = playerStats;
-            hud.scoreBar = FindRect(scene, "scoreBar");
-            hud.infoBar = FindRect(scene, "infoBar");
-            hud.healthLine = FindComponentByName<Image>(scene, "healthLine");
-            hud.expLine = FindComponentByName<Image>(scene, "expLine");
-            hud.cinzelFont = FindCinzelFont();
-            hud.BuildHUD();
-            EditorUtility.SetDirty(hud);
-        }
-
-        if (levelSystem != null)
-        {
-            levelSystem.uiManager = uiManager;
-            levelSystem.rootCanvas = rootCanvas;
-            levelSystem.BuildUI();
-            levelSystem.SetOverlayActive(false);
-            EditorUtility.SetDirty(levelSystem);
         }
 
         if (playerStats != null)
         {
             playerStats.scoreManager = scoreManager;
             playerStats.playerController = playerController;
-            playerStats.levelUpChoiceSystem = levelSystem;
+            playerStats.uiManager = uiManager;
             playerStats.audioSource = playerStats.GetComponent<AudioSource>();
             EditorUtility.SetDirty(playerStats);
         }
@@ -138,7 +125,6 @@ public static class InspectorReferenceSetup
         if (enemySpawner != null)
         {
             enemySpawner.player = playerStats == null ? null : playerStats.transform;
-            enemySpawner.difficultySettings = difficultySettings;
             EditorUtility.SetDirty(enemySpawner);
         }
 

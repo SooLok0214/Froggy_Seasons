@@ -16,6 +16,11 @@ public class ThirdPersonCamera : MonoBehaviour
     public float minPitch = 10f;
     public float maxPitch = 65f;
 
+    [Header("Starting View")]
+    public bool useConfiguredStartView = true;
+    public float startYawOffset = 0f;
+    public float startPitch = 20f;
+
     public float yaw;
     public float pitch = 20f;
     public int cameraTouchId = -1;
@@ -36,14 +41,26 @@ public class ThirdPersonCamera : MonoBehaviour
 
     public void Start()
     {
-        if (target != null)
-            yaw = target.eulerAngles.y;
+        if (target == null)
+            return;
+
+        yaw = target.eulerAngles.y + startYawOffset;
+
+        if (useConfiguredStartView)
+            pitch = Mathf.Clamp(startPitch, minPitch, maxPitch);
+        else
+            pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+
+        UpdateCameraPosition(true);
     }
 
     public void Update()
     {
-        if (!controlsEnabled)
+        if (!controlsEnabled || Time.timeScale <= 0f)
+        {
+            ResetTouchState();
             return;
+        }
 
         TouchCameraControl();
         MouseCameraControl();
@@ -55,10 +72,13 @@ public class ThirdPersonCamera : MonoBehaviour
         crosshairVisible = active;
 
         if (!active)
-        {
-            cameraTouchId = -1;
-            cameraTouching = false;
-        }
+            ResetTouchState();
+    }
+
+    public void ResetTouchState()
+    {
+        cameraTouchId = -1;
+        cameraTouching = false;
     }
 
     public void TouchCameraControl()
@@ -111,6 +131,14 @@ public class ThirdPersonCamera : MonoBehaviour
 
     public void LateUpdate()
     {
+        if (target == null || Time.timeScale <= 0f)
+            return;
+
+        UpdateCameraPosition(false);
+    }
+
+    public void UpdateCameraPosition(bool immediate)
+    {
         if (target == null)
             return;
 
@@ -120,17 +148,16 @@ public class ThirdPersonCamera : MonoBehaviour
             + cameraRotation * Vector3.right * horizontalOffset
             - cameraRotation * Vector3.forward * distance;
 
-        transform.position = Vector3.Lerp(
-            transform.position,
-            targetPosition,
-            smoothSpeed * Time.unscaledDeltaTime
-        );
+        if (immediate)
+        {
+            transform.position = targetPosition;
+            transform.rotation = cameraRotation;
+            return;
+        }
 
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            cameraRotation,
-            smoothSpeed * Time.unscaledDeltaTime
-        );
+        float followAmount = smoothSpeed * Time.deltaTime;
+        transform.position = Vector3.Lerp(transform.position, targetPosition, followAmount);
+        transform.rotation = Quaternion.Slerp(transform.rotation, cameraRotation, followAmount);
     }
 
     public Color crosshairColor = Color.white;

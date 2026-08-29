@@ -18,7 +18,7 @@ public class PlayerStats : MonoBehaviour
 
     public ScoreManager scoreManager;
     public PlayerController playerController;
-    public LevelUpChoiceSystem levelUpChoiceSystem;
+    public UIManager uiManager;
 
     public AudioSource audioSource;
     public AudioClip atkSFX;
@@ -124,10 +124,8 @@ public class PlayerStats : MonoBehaviour
 
         SyncLevelRecord();
 
-        if (levelUpChoiceSystem != null)
-        {
-            levelUpChoiceSystem.ShowChoices(this);
-        }
+        if (uiManager != null)
+            uiManager.ShowLevelUpChoices(this);
     }
 
     public void SyncLevelRecord()

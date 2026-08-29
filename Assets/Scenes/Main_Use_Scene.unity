@@ -3057,7 +3057,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1193287847}
   - component: {fileID: 1193287846}
-  - component: {fileID: 1193287848}
   m_Layer: 0
   m_Name: ScoreManager
   m_TagString: Untagged
@@ -3106,29 +3105,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1193287848
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1193287845}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25e6ba5458ac81a4ba4575453feb1d48, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameplayHUD
-  scoreManager: {fileID: 1193287846}
-  playerStats: {fileID: 0}
-  scoreBar: {fileID: 0}
-  infoBar: {fileID: 0}
-  healthLine: {fileID: 0}
-  expLine: {fileID: 0}
-  liveKillsText: {fileID: 0}
-  liveTimeText: {fileID: 0}
-  healthText: {fileID: 0}
-  levelText: {fileID: 0}
-  cinzelFont: {fileID: 12800000, guid: 43e9f156258a295448b6f2bc2bdde7a0, type: 3}
 --- !u!1 &1196769669
 GameObject:
   m_ObjectHideFlags: 0
@@ -4621,7 +4597,6 @@ MonoBehaviour:
   scoreManager: {fileID: 1193287846}
   musicManager: {fileID: 88441017}
   enemySpawner: {fileID: 0}
-  levelUpChoiceSystem: {fileID: 0}
   gameStarted: 0
 --- !u!4 &1808427580
 Transform:

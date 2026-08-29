@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.EventSystems;
 
 public class PlayerAttack : MonoBehaviour
@@ -28,6 +29,27 @@ public class PlayerAttack : MonoBehaviour
 
     [Header("Hold Attack")]
     public bool isHoldingAttack;
+    public bool buttonHoldingAttack;
+
+    [Header("Attack Touch Area (0 - 1 Screen)")]
+    public bool useAttackTouchArea = true;
+
+    [Range(0f, 1f)]
+    [InspectorName("左邊界 (Left)")]
+    public float attackAreaLeft = 0.5f;
+
+    [Range(0f, 1f)]
+    [InspectorName("右邊界 (Right)")]
+    public float attackAreaRight = 1f;
+
+    [Range(0f, 1f)]
+    [InspectorName("下邊界 (Bottom)")]
+    public float attackAreaBottom = 0f;
+
+    [Range(0f, 1f)]
+    [InspectorName("上邊界 (Top)")]
+    public float attackAreaTop = 1f;
+
     public float nextFireTime;
     public EventTrigger attackEventTrigger;
     public EventTrigger.Entry attackPointerDownEntry;
@@ -44,6 +66,8 @@ public class PlayerAttack : MonoBehaviour
 
     public void Update()
     {
+        isHoldingAttack = buttonHoldingAttack || IsAttackAreaPressed();
+
         if (isHoldingAttack)
             Fire();
 
@@ -99,23 +123,63 @@ public class PlayerAttack : MonoBehaviour
 
     public void OnAttackPointerDown(BaseEventData eventData)
     {
-        isHoldingAttack = true;
+        buttonHoldingAttack = true;
         Fire();
     }
 
     public void OnAttackPointerUp(BaseEventData eventData)
     {
-        isHoldingAttack = false;
+        buttonHoldingAttack = false;
+    }
+
+    public bool IsAttackAreaPressed()
+    {
+        if (Time.timeScale <= 0f ||
+            !useAttackTouchArea || attackButton == null ||
+            !attackButton.gameObject.activeInHierarchy ||
+            !attackButton.interactable)
+            return false;
+
+        if (Touchscreen.current != null)
+        {
+            foreach (TouchControl touch in Touchscreen.current.touches)
+            {
+                if (touch.press.isPressed &&
+                    IsInsideAttackArea(touch.position.ReadValue()))
+                    return true;
+            }
+        }
+
+        return Mouse.current != null &&
+            Mouse.current.leftButton.isPressed &&
+            IsInsideAttackArea(Mouse.current.position.ReadValue());
+    }
+
+    public bool IsInsideAttackArea(Vector2 screenPosition)
+    {
+        if (Screen.width <= 0 || Screen.height <= 0)
+            return false;
+
+        float x = screenPosition.x / Screen.width;
+        float y = screenPosition.y / Screen.height;
+        float left = Mathf.Min(attackAreaLeft, attackAreaRight);
+        float right = Mathf.Max(attackAreaLeft, attackAreaRight);
+        float bottom = Mathf.Min(attackAreaBottom, attackAreaTop);
+        float top = Mathf.Max(attackAreaBottom, attackAreaTop);
+
+        return x >= left && x <= right && y >= bottom && y <= top;
     }
 
     public void OnDisable()
     {
         isHoldingAttack = false;
+        buttonHoldingAttack = false;
     }
 
     public void OnDestroy()
     {
         isHoldingAttack = false;
+        buttonHoldingAttack = false;
 
         if (attackEventTrigger == null || attackEventTrigger.triggers == null)
             return;
@@ -194,4 +258,71 @@ public class PlayerAttack : MonoBehaviour
             MusicManager.instance.PlayFireSfx();
     }
 
+}
+
+// Fireballs are created only by PlayerAttack at runtime, so keeping their
+// short-lived behaviour beside the firing code avoids a separate script asset.
+public class MagicProjectile : MonoBehaviour
+{
+    public GameObject owner;
+    public float damage = 25f;
+    public float lifeTime = 4f;
+    public Color fireColor = new Color(1f, 0.24f, 0.02f, 1f);
+    public bool hasHit;
+
+    public void Start()
+    {
+        Destroy(gameObject, lifeTime);
+    }
+
+    public void BuildFireLook()
+    {
+        Renderer projectileRenderer = GetComponent<Renderer>();
+        if (projectileRenderer != null)
+        {
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null)
+                shader = Shader.Find("Standard");
+
+            Material material = new Material(shader);
+            material.color = fireColor;
+            if (material.HasProperty("_EmissionColor"))
+            {
+                material.EnableKeyword("_EMISSION");
+                material.SetColor("_EmissionColor", fireColor * 3f);
+            }
+            projectileRenderer.material = material;
+        }
+
+        Light fireLight = gameObject.AddComponent<Light>();
+        fireLight.color = fireColor;
+        fireLight.range = 2.5f;
+        fireLight.intensity = 2f;
+    }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        if (hasHit || other.gameObject == owner ||
+            other.transform.IsChildOf(owner.transform))
+            return;
+
+        EnemyFollowPlayer enemy = other.GetComponentInParent<EnemyFollowPlayer>();
+        if (enemy != null)
+        {
+            EnemyHealth health = enemy.GetComponent<EnemyHealth>();
+            if (health == null)
+                health = enemy.gameObject.AddComponent<EnemyHealth>();
+
+            hasHit = true;
+            health.TakeDamage(damage);
+            Destroy(gameObject);
+            return;
+        }
+
+        if (!other.isTrigger)
+        {
+            hasHit = true;
+            Destroy(gameObject);
+        }
+    }
 }

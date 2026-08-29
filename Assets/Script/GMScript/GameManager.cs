@@ -12,7 +12,6 @@ public class GameManager : MonoBehaviour
     public ScoreManager scoreManager;
     public MusicManager musicManager;
     public EnemySpawner enemySpawner;
-    public LevelUpChoiceSystem levelUpChoiceSystem;
 
     public bool gameStarted;
 
@@ -73,8 +72,8 @@ public class GameManager : MonoBehaviour
 
         gameStarted = false;
 
-        if (levelUpChoiceSystem != null)
-            levelUpChoiceSystem.CancelChoices();
+        if (uiManager != null)
+            uiManager.CancelLevelUpChoices();
 
         if (enemySpawner != null)
             enemySpawner.StopSpawning();
