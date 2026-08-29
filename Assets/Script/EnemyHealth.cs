@@ -18,6 +18,9 @@ public class EnemyHealth : MonoBehaviour
 
         currentHealth = Mathf.Max(0f, currentHealth - damage);
 
+        if (MusicManager.instance != null)
+            MusicManager.instance.PlayMonsterHitSfx();
+
         if (currentHealth <= 0f)
             Die();
     }

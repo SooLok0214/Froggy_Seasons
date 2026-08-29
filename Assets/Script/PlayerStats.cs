@@ -31,49 +31,43 @@ public class PlayerStats : MonoBehaviour
 
         CacheReferences();
 
-        // 火球的基礎傷害是 25。舊場景若仍保存為 10，載入時同步更新。
         if (attack < 25f)
-        {
             attack = 25f;
-        }
 
         SyncLevelRecord();
+        RefreshHUD();
     }
 
     public void TakeDamage(float damage)
     {
         if (isDead)
-        {
             return;
-        }
 
         currentHealth = Mathf.Max(0f, currentHealth - damage);
 
         if (audioSource != null && atkSFX != null)
-        {
             audioSource.PlayOneShot(atkSFX);
-        }
+
+        RefreshHUD();
 
         if (currentHealth <= 0f)
-        {
             Die();
-        }
     }
 
     public void Heal(float amount)
     {
         if (isDead)
-        {
             return;
-        }
 
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        RefreshHUD();
     }
 
     public void IncreaseMaxHealth(float amount)
     {
         maxHealth += amount;
         currentHealth += amount;
+        RefreshHUD();
     }
 
     public void IncreaseAttack(float amount)
@@ -89,9 +83,7 @@ public class PlayerStats : MonoBehaviour
     public void AddExperience(float amount)
     {
         if (isDead || amount <= 0f)
-        {
             return;
-        }
 
         currentExp += amount;
 
@@ -99,7 +91,10 @@ public class PlayerStats : MonoBehaviour
         {
             currentExp = 0f;
             LevelUp();
+            return;
         }
+
+        RefreshHUD();
     }
 
     public void LevelUp()
@@ -112,17 +107,14 @@ public class PlayerStats : MonoBehaviour
                 playerController = GetComponent<PlayerController>();
 
             if (playerController != null)
-            {
                 playerController.speed += speedIncreaseEveryFiveLevels;
-            }
         }
 
         if (MusicManager.instance != null)
-        {
             MusicManager.instance.PlayLevelUpSfx();
-        }
 
         SyncLevelRecord();
+        RefreshHUD();
 
         if (uiManager != null)
             uiManager.ShowLevelUpChoices(this);
@@ -131,9 +123,7 @@ public class PlayerStats : MonoBehaviour
     public void SyncLevelRecord()
     {
         if (scoreManager != null)
-        {
             scoreManager.SetLevel(currentLevel);
-        }
     }
 
     public void CacheReferences()
@@ -143,15 +133,21 @@ public class PlayerStats : MonoBehaviour
 
         if (playerController == null)
             playerController = GetComponent<PlayerController>();
+    }
 
+    public void RefreshHUD()
+    {
+        if (uiManager == null)
+            return;
+
+        uiManager.ResetHUDCache();
+        uiManager.UpdateHUD();
     }
 
     public void Die()
     {
         if (isDead)
-        {
             return;
-        }
 
         isDead = true;
 

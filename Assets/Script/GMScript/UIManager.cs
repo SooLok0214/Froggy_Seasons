@@ -77,6 +77,7 @@ public class UIManager : MonoBehaviour
         BuildHUD();
         BuildLevelUpUI();
         SetLevelUpOverlayActive(false);
+        ResetHUDCache();
         UpdateHUD();
     }
 
@@ -116,6 +117,8 @@ public class UIManager : MonoBehaviour
 
         ShowGameplayUI();
         SetCameraGameplayControl(true);
+        ResetHUDCache();
+        UpdateHUD();
     }
 
     public void PauseResume()
@@ -480,6 +483,17 @@ public class UIManager : MonoBehaviour
 
         PrepareBar(healthLine);
         PrepareBar(expLine);
+    }
+
+    public void ResetHUDCache()
+    {
+        displayedKills = -1;
+        displayedTime = -1;
+        displayedHealth = -1f;
+        displayedMaxHealth = -1f;
+        displayedExp = -1f;
+        displayedExpTarget = -1f;
+        displayedLevel = -1;
     }
 
     public void PrepareBar(Image bar)

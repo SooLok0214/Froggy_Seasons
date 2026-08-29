@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MusicManager : MonoBehaviour
@@ -19,6 +20,7 @@ public class MusicManager : MonoBehaviour
     [System.NonSerialized] public AudioSource frogCroakSfx;
     [System.NonSerialized] public AudioSource fireSfx;
     [System.NonSerialized] public AudioSource levelUpSfx;
+    [System.NonSerialized] public AudioSource monsterHitSfx;
 
     public bool bgmMuted;
     public bool sfxMuted;
@@ -36,6 +38,7 @@ public class MusicManager : MonoBehaviour
 
         instance = this;
         DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += OnSceneLoaded;
 
         if (sceneGameManager != null)
             sceneGameManager.musicManager = this;
@@ -58,6 +61,7 @@ public class MusicManager : MonoBehaviour
         ApplyBgmVolume();
         ApplySfxVolume();
         BindSliders();
+        BindButtonAudio();
     }
 
     public void OnDestroy()
@@ -65,6 +69,7 @@ public class MusicManager : MonoBehaviour
         if (instance != this)
             return;
 
+        SceneManager.sceneLoaded -= OnSceneLoaded;
         instance = null;
     }
 
@@ -94,6 +99,7 @@ public class MusicManager : MonoBehaviour
         frogCroakSfx = FindAudioSource("SFX-FrogCroak");
         fireSfx = FindAudioSource("SFX-Fire");
         levelUpSfx = FindAudioSource("SFX-LevelUp");
+        monsterHitSfx = FindAudioSource("SFX-MonsterHit");
 
         AudioMixerGroup bgmGroup = FindMixerGroup("BGM");
         AudioMixerGroup sfxGroup = FindMixerGroup("SFX");
@@ -105,6 +111,45 @@ public class MusicManager : MonoBehaviour
         SetupAudioSource(frogCroakSfx, sfxGroup, false);
         SetupAudioSource(fireSfx, sfxGroup, false);
         SetupAudioSource(levelUpSfx, sfxGroup, false);
+        SetupAudioSource(monsterHitSfx, sfxGroup, false);
+    }
+
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        BindButtonAudio();
+    }
+
+    public void BindButtonAudio()
+    {
+        Button[] buttons = Object.FindObjectsByType<Button>(FindObjectsInactive.Include);
+
+        foreach (Button button in buttons)
+        {
+            if (button.name == "attackButton")
+                continue;
+
+            button.onClick.RemoveListener(PlayButtonClick);
+            button.onClick.AddListener(PlayButtonClick);
+
+            if (button.name == "homeLogoButton")
+            {
+                button.onClick.RemoveListener(PlayButtonClick);
+                button.onClick.RemoveListener(PlayFrogCroak);
+                button.onClick.AddListener(PlayFrogCroak);
+            }
+
+            if (button.name == "musicBtn")
+            {
+                button.onClick.RemoveListener(ToggleBgmMute);
+                button.onClick.AddListener(ToggleBgmMute);
+            }
+
+            if (button.name == "SFXbtn")
+            {
+                button.onClick.RemoveListener(ToggleSfxMute);
+                button.onClick.AddListener(ToggleSfxMute);
+            }
+        }
     }
 
     public AudioSource FindAudioSource(string childName)
@@ -203,6 +248,11 @@ public class MusicManager : MonoBehaviour
     public void PlayLevelUpSfx()
     {
         PlaySfx(levelUpSfx);
+    }
+
+    public void PlayMonsterHitSfx()
+    {
+        PlaySfx(monsterHitSfx);
     }
 
     public void PlaySfx(AudioClip clip)

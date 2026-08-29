@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+[InitializeOnLoad]
 public static class InspectorReferenceSetup
 {
     public static string[] scenePaths =
@@ -12,6 +13,33 @@ public static class InspectorReferenceSetup
         "Assets/Scenes/Main_Use_Scene.unity",
         "Assets/Scenes/InGameScene.unity"
     };
+
+    static InspectorReferenceSetup()
+    {
+        EditorApplication.delayCall += ConnectOpenGameplayScene;
+        EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+    }
+
+    public static void OnPlayModeStateChanged(PlayModeStateChange state)
+    {
+        if (state == PlayModeStateChange.EnteredEditMode)
+            EditorApplication.delayCall += ConnectOpenGameplayScene;
+    }
+
+    public static void ConnectOpenGameplayScene()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+            return;
+
+        Scene scene = SceneManager.GetActiveScene();
+        if (!scene.IsValid() || scene.name != "InGameScene")
+            return;
+
+        ConnectScene(scene);
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        Debug.Log("[Froggy] InGame HUD references connected and refreshed.");
+    }
 
     [MenuItem("Tools/Froggy/Connect Inspector References")]
     public static void ConnectAllScenes()
@@ -46,6 +74,10 @@ public static class InspectorReferenceSetup
         ThirdPersonCamera thirdPersonCamera = FindComponent<ThirdPersonCamera>(scene);
         Canvas rootCanvas = FindRootCanvas(scene);
 
+        GameObject oldAttackTouchArea = FindObject(scene, "attackTouchArea");
+        if (oldAttackTouchArea != null)
+            Object.DestroyImmediate(oldAttackTouchArea, true);
+
         if (gameManager != null)
         {
             gameManager.uiManager = uiManager;
@@ -77,10 +109,16 @@ public static class InspectorReferenceSetup
 
             uiManager.scoreBarRect = FindRect(scene, "scoreBar");
             uiManager.infoBarRect = FindRect(scene, "infoBar");
-            uiManager.healthLine = FindComponentByName<Image>(scene, "healthLine");
-            uiManager.expLine = FindComponentByName<Image>(scene, "expLine");
+            uiManager.healthLine = FindChildComponent<Image>(uiManager.infoBarRect, "healthLine");
+            uiManager.expLine = FindChildComponent<Image>(uiManager.infoBarRect, "expLine");
+            uiManager.healthText = FindChildComponent<Text>(uiManager.infoBarRect, "HealthValue");
+            uiManager.levelText = FindChildComponent<Text>(uiManager.infoBarRect, "LevelValue");
+            uiManager.liveKillsText = FindChildComponent<Text>(uiManager.scoreBarRect, "LiveKillValue");
+            uiManager.liveTimeText = FindChildComponent<Text>(uiManager.scoreBarRect, "LiveTimeValue");
             uiManager.cinzelFont = FindCinzelFont();
             uiManager.BuildHUD();
+            uiManager.ResetHUDCache();
+            uiManager.UpdateHUD();
             uiManager.BuildLevelUpUI();
             uiManager.SetLevelUpOverlayActive(false);
 
@@ -128,30 +166,6 @@ public static class InspectorReferenceSetup
             EditorUtility.SetDirty(enemySpawner);
         }
 
-        ConnectButtonAudio(scene);
-    }
-
-    public static void ConnectButtonAudio(Scene scene)
-    {
-        foreach (GameObject root in scene.GetRootGameObjects())
-        {
-            Button[] buttons = root.GetComponentsInChildren<Button>(true);
-
-            foreach (Button button in buttons)
-            {
-                if (button.name == "attackButton")
-                    continue;
-
-                UIButtonAudio audio = button.GetComponent<UIButtonAudio>();
-                if (audio == null)
-                    audio = button.gameObject.AddComponent<UIButtonAudio>();
-
-                audio.playFrogCroak = button.name == "homeLogoButton";
-                audio.toggleBgmMute = button.name == "musicBtn";
-                audio.toggleSfxMute = button.name == "SFXbtn";
-                EditorUtility.SetDirty(audio);
-            }
-        }
     }
 
     public static T FindComponent<T>(Scene scene) where T : Component
@@ -194,6 +208,16 @@ public static class InspectorReferenceSetup
     {
         GameObject target = FindObject(scene, objectName);
         return target == null ? null : target.GetComponent<RectTransform>();
+    }
+
+    public static T FindChildComponent<T>(RectTransform parent, string objectName)
+        where T : Component
+    {
+        if (parent == null)
+            return null;
+
+        Transform child = parent.Find(objectName);
+        return child == null ? null : child.GetComponent<T>();
     }
 
     public static Canvas FindRootCanvas(Scene scene)

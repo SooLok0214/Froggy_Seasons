@@ -49,6 +49,7 @@ public static class MusicManagerAudioSetup
         SetupSource(manager.transform, "SFX-FrogCroak", LoadClip("f0b312f94c4f679438044522fff3e04e"), sfxGroup, false);
         SetupSource(manager.transform, "SFX-Fire", LoadClip("feae47775d055c345932272ea6ded8b8"), sfxGroup, false);
         SetupSource(manager.transform, "SFX-LevelUp", LoadClip("e9c443ff94211ba43a4d551206fd51b6"), sfxGroup, false);
+        SetupSource(manager.transform, "SFX-MonsterHit", LoadClip("5dc5472c0ee7e5448bbca3a33412a3a3"), sfxGroup, false);
 
         AudioSource rootSource = manager.GetComponent<AudioSource>();
 

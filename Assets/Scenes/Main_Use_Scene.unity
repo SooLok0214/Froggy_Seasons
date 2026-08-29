@@ -303,6 +303,7 @@ Transform:
   - {fileID: 1196769670}
   - {fileID: 1774207439}
   - {fileID: 11709165}
+  - {fileID: 971677702}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &204824931
@@ -966,7 +967,6 @@ GameObject:
   - component: {fileID: 468238245}
   - component: {fileID: 468238244}
   - component: {fileID: 468238246}
-  - component: {fileID: 468238247}
   m_Layer: 5
   m_Name: menuSettingBtn
   m_TagString: Untagged
@@ -1084,21 +1084,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &468238247
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 468238242}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e42f915d63cde7241b2ceb63064a243c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
-  playFrogCroak: 0
-  toggleBgmMute: 0
-  toggleSfxMute: 0
 --- !u!1 &481666625
 GameObject:
   m_ObjectHideFlags: 0
@@ -1264,7 +1249,6 @@ GameObject:
   - component: {fileID: 547543731}
   - component: {fileID: 547543730}
   - component: {fileID: 547543729}
-  - component: {fileID: 547543732}
   m_Layer: 5
   m_Name: homeSettingBtn
   m_TagString: Untagged
@@ -1385,21 +1369,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 547543727}
   m_CullTransparentMesh: 1
---- !u!114 &547543732
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 547543727}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e42f915d63cde7241b2ceb63064a243c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
-  playFrogCroak: 0
-  toggleBgmMute: 0
-  toggleSfxMute: 0
 --- !u!1 &572969561
 GameObject:
   m_ObjectHideFlags: 0
@@ -1412,7 +1381,6 @@ GameObject:
   - component: {fileID: 572969565}
   - component: {fileID: 572969564}
   - component: {fileID: 572969563}
-  - component: {fileID: 572969566}
   m_Layer: 5
   m_Name: menuBack
   m_TagString: Untagged
@@ -1530,21 +1498,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 572969561}
   m_CullTransparentMesh: 1
---- !u!114 &572969566
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 572969561}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e42f915d63cde7241b2ceb63064a243c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
-  playFrogCroak: 0
-  toggleBgmMute: 0
-  toggleSfxMute: 0
 --- !u!1 &621628234
 GameObject:
   m_ObjectHideFlags: 0
@@ -1668,7 +1621,6 @@ GameObject:
   - component: {fileID: 653404786}
   - component: {fileID: 653404785}
   - component: {fileID: 653404784}
-  - component: {fileID: 653404788}
   m_Layer: 5
   m_Name: homeStartBtn
   m_TagString: Untagged
@@ -1789,21 +1741,6 @@ RectTransform:
   m_AnchoredPosition: {x: 624, y: -41}
   m_SizeDelta: {x: 595.19995, y: 75.600006}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &653404788
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 653404783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e42f915d63cde7241b2ceb63064a243c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
-  playFrogCroak: 0
-  toggleBgmMute: 0
-  toggleSfxMute: 0
 --- !u!1 &669626160
 GameObject:
   m_ObjectHideFlags: 0
@@ -1893,7 +1830,6 @@ GameObject:
   - component: {fileID: 674083051}
   - component: {fileID: 674083050}
   - component: {fileID: 674083052}
-  - component: {fileID: 674083053}
   m_Layer: 5
   m_Name: menuQuitBtn
   m_TagString: Untagged
@@ -2011,21 +1947,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &674083053
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 674083048}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e42f915d63cde7241b2ceb63064a243c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
-  playFrogCroak: 0
-  toggleBgmMute: 0
-  toggleSfxMute: 0
 --- !u!224 &698029169 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3881087803549984436, guid: ec536a7718376554185e4a856d5ae230, type: 3}
@@ -2183,7 +2104,6 @@ GameObject:
   - component: {fileID: 720356436}
   - component: {fileID: 720356435}
   - component: {fileID: 720356434}
-  - component: {fileID: 720356437}
   m_Layer: 5
   m_Name: homeTutorialBtn
   m_TagString: Untagged
@@ -2292,21 +2212,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 720356432}
   m_CullTransparentMesh: 1
---- !u!114 &720356437
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 720356432}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e42f915d63cde7241b2ceb63064a243c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
-  playFrogCroak: 0
-  toggleBgmMute: 0
-  toggleSfxMute: 0
 --- !u!1 &732120810
 GameObject:
   m_ObjectHideFlags: 0
@@ -2649,7 +2554,6 @@ GameObject:
   - component: {fileID: 845350168}
   - component: {fileID: 845350167}
   - component: {fileID: 845350166}
-  - component: {fileID: 845350169}
   m_Layer: 0
   m_Name: homeLogoButton
   m_TagString: Untagged
@@ -2758,21 +2662,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 845350164}
   m_CullTransparentMesh: 1
---- !u!114 &845350169
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 845350164}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e42f915d63cde7241b2ceb63064a243c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
-  playFrogCroak: 1
-  toggleBgmMute: 0
-  toggleSfxMute: 0
 --- !u!1 &946034604
 GameObject:
   m_ObjectHideFlags: 0
@@ -2785,7 +2674,6 @@ GameObject:
   - component: {fileID: 946034607}
   - component: {fileID: 946034606}
   - component: {fileID: 946034608}
-  - component: {fileID: 946034609}
   m_Layer: 5
   m_Name: menuResumeBtn
   m_TagString: Untagged
@@ -2903,21 +2791,135 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &946034609
-MonoBehaviour:
+--- !u!1 &971677701
+GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 946034604}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 971677702}
+  - component: {fileID: 971677703}
+  m_Layer: 0
+  m_Name: SFX-MonsterHit
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &971677702
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 971677701}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 88441019}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &971677703
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 971677701}
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e42f915d63cde7241b2ceb63064a243c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
-  playFrogCroak: 0
-  toggleBgmMute: 0
-  toggleSfxMute: 0
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 5906972370078674619, guid: 13dc61c54fa967f42b41e3796630a4c2, type: 2}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: 5dc5472c0ee7e5448bbca3a33412a3a3, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1062662720
 GameObject:
   m_ObjectHideFlags: 0
@@ -4089,7 +4091,6 @@ GameObject:
   - component: {fileID: 1723444430}
   - component: {fileID: 1723444429}
   - component: {fileID: 1723444428}
-  - component: {fileID: 1723444431}
   m_Layer: 5
   m_Name: pauseResumeBtn
   m_TagString: Untagged
@@ -4210,21 +4211,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1723444426}
   m_CullTransparentMesh: 1
---- !u!114 &1723444431
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1723444426}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e42f915d63cde7241b2ceb63064a243c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
-  playFrogCroak: 0
-  toggleBgmMute: 0
-  toggleSfxMute: 0
 --- !u!1 &1726336994
 GameObject:
   m_ObjectHideFlags: 0
@@ -4700,7 +4686,6 @@ GameObject:
   - component: {fileID: 1904070757}
   - component: {fileID: 1904070756}
   - component: {fileID: 1904070758}
-  - component: {fileID: 1904070759}
   m_Layer: 5
   m_Name: endBackMenu
   m_TagString: Untagged
@@ -4821,21 +4806,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &1904070759
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1904070754}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e42f915d63cde7241b2ceb63064a243c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
-  playFrogCroak: 0
-  toggleBgmMute: 0
-  toggleSfxMute: 0
 --- !u!1 &1907217746
 GameObject:
   m_ObjectHideFlags: 0
@@ -5202,6 +5172,30 @@ MonoBehaviour:
   gameplayEmpty: {fileID: 0}
   crosshair: {fileID: 0}
   thirdPersonCamera: {fileID: 0}
+  scoreManager: {fileID: 0}
+  playerStats: {fileID: 0}
+  scoreBarRect: {fileID: 0}
+  infoBarRect: {fileID: 0}
+  healthLine: {fileID: 0}
+  expLine: {fileID: 0}
+  liveKillsText: {fileID: 0}
+  liveTimeText: {fileID: 0}
+  healthText: {fileID: 0}
+  levelText: {fileID: 0}
+  cinzelFont: {fileID: 0}
+  addDamageSprite: {fileID: 0}
+  addHealthSprite: {fileID: 0}
+  restoreHealthSprite: {fileID: 0}
+  cardSize: {x: 357, y: 600}
+  cardGap: 90
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.82}
+  overlayOverscan: 300
+  levelUpOverlay: {fileID: 0}
+  leftChoiceButton: {fileID: 0}
+  rightChoiceButton: {fileID: 0}
+  rootCanvas: {fileID: 0}
+  levelUpPlayer: {fileID: 0}
+  levelUpSelectionOpen: 0
   gameStarted: 0
   settingsOpenedFromHome: 0
 --- !u!4 &2115305639

@@ -7,8 +7,6 @@ using UnityEngine.EventSystems;
 public class PlayerAttack : MonoBehaviour
 {
     public Button attackButton;
-    [InspectorName("攻擊觸控範圍 (Canvas)")]
-    public Button attackTouchAreaButton;
     public Camera aimCamera;
 
     public float projectileSpeed = 18f;
@@ -33,9 +31,9 @@ public class PlayerAttack : MonoBehaviour
     public bool buttonHoldingAttack;
 
     public float nextFireTime;
-    public List<EventTrigger> attackEventTriggers = new List<EventTrigger>();
-    public List<EventTrigger.Entry> attackTriggerEntries =
-        new List<EventTrigger.Entry>();
+    public EventTrigger attackEventTrigger;
+    public EventTrigger.Entry attackPointerDownEntry;
+    public EventTrigger.Entry attackPointerUpEntry;
     public PlayerStats playerStats;
 
     public void Start()
@@ -68,47 +66,28 @@ public class PlayerAttack : MonoBehaviour
 
     public void SetupHoldAttack()
     {
-        AddHoldEvents(attackButton);
-
-        if (attackTouchAreaButton != attackButton)
-            AddHoldEvents(attackTouchAreaButton);
-    }
-
-    public void AddHoldEvents(Button button)
-    {
-        if (button == null)
+        if (attackButton == null)
             return;
 
-        EventTrigger trigger = button.GetComponent<EventTrigger>();
+        attackEventTrigger = attackButton.GetComponent<EventTrigger>();
 
-        if (trigger == null)
-            trigger = button.gameObject.AddComponent<EventTrigger>();
+        if (attackEventTrigger == null)
+            attackEventTrigger = attackButton.gameObject.AddComponent<EventTrigger>();
 
-        if (trigger.triggers == null)
-            trigger.triggers = new List<EventTrigger.Entry>();
+        if (attackEventTrigger.triggers == null)
+            attackEventTrigger.triggers = new List<EventTrigger.Entry>();
 
-        EventTrigger.Entry pointerDown = CreateTriggerEntry(
+        attackPointerDownEntry = CreateTriggerEntry(
             EventTriggerType.PointerDown,
             OnAttackPointerDown
         );
-        trigger.triggers.Add(pointerDown);
+        attackEventTrigger.triggers.Add(attackPointerDownEntry);
 
-        EventTrigger.Entry pointerUp = CreateTriggerEntry(
+        attackPointerUpEntry = CreateTriggerEntry(
             EventTriggerType.PointerUp,
             OnAttackPointerUp
         );
-        trigger.triggers.Add(pointerUp);
-
-        EventTrigger.Entry pointerExit = CreateTriggerEntry(
-            EventTriggerType.PointerExit,
-            OnAttackPointerUp
-        );
-        trigger.triggers.Add(pointerExit);
-
-        attackEventTriggers.Add(trigger);
-        attackTriggerEntries.Add(pointerDown);
-        attackTriggerEntries.Add(pointerUp);
-        attackTriggerEntries.Add(pointerExit);
+        attackEventTrigger.triggers.Add(attackPointerUpEntry);
     }
 
     public EventTrigger.Entry CreateTriggerEntry(
@@ -147,34 +126,11 @@ public class PlayerAttack : MonoBehaviour
         isHoldingAttack = false;
         buttonHoldingAttack = false;
 
-        foreach (EventTrigger trigger in attackEventTriggers)
-        {
-            if (trigger == null || trigger.triggers == null)
-                continue;
-
-            trigger.triggers.RemoveAll(
-                entry => attackTriggerEntries.Contains(entry)
-            );
-        }
-    }
-
-    public void OnDrawGizmos()
-    {
-        if (attackTouchAreaButton == null)
+        if (attackEventTrigger == null || attackEventTrigger.triggers == null)
             return;
 
-        RectTransform area =
-            attackTouchAreaButton.transform as RectTransform;
-
-        if (area == null)
-            return;
-
-        Vector3[] corners = new Vector3[4];
-        area.GetWorldCorners(corners);
-        Gizmos.color = new Color(1f, 0.55f, 0f, 0.9f);
-
-        for (int i = 0; i < 4; i++)
-            Gizmos.DrawLine(corners[i], corners[(i + 1) % 4]);
+        attackEventTrigger.triggers.Remove(attackPointerDownEntry);
+        attackEventTrigger.triggers.Remove(attackPointerUpEntry);
     }
 
     public void Fire()
