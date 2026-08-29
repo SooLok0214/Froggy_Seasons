@@ -22,6 +22,11 @@ public class UIManager : MonoBehaviour
     public GameObject settingsPanel;
     public GameObject menuBack;
 
+    [Header("Credits")]
+    public Button infoCreditsButton;
+    public GameObject creditsPanel;
+    public Button creditsBackButton;
+
     public GameObject gameOverPanel;
 
     // Gameplay UI
@@ -74,9 +79,11 @@ public class UIManager : MonoBehaviour
 
     public void Start()
     {
+        BindCreditsButtons();
         BuildHUD();
         BuildLevelUpUI();
         SetLevelUpOverlayActive(false);
+        SetActive(creditsPanel, false);
         ResetHUDCache();
         UpdateHUD();
     }
@@ -139,6 +146,8 @@ public class UIManager : MonoBehaviour
             SetActive(pauseMenu, true);
             SetActive(settingsPanel, false);
             SetActive(menuBack, false);
+            SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, true);
+            SetActive(creditsPanel, false);
             HideGameplayUI();
         }
         else
@@ -158,7 +167,63 @@ public class UIManager : MonoBehaviour
         SetActive(pauseMenu, false);
         SetActive(settingsPanel, true);
         SetActive(menuBack, true);
+        SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, false);
+        SetActive(creditsPanel, false);
         HideGameplayUI();
+    }
+
+    public void OpenCredits()
+    {
+        if (!gameStarted)
+            return;
+
+        bool creditsInsideSettings = creditsPanel != null && settingsPanel != null &&
+                                     creditsPanel.transform.IsChildOf(settingsPanel.transform);
+
+        Time.timeScale = 0f;
+        SetCameraGameplayControl(false);
+        SetActive(pausePanel, true);
+        SetActive(pauseMenu, false);
+        SetActive(settingsPanel, creditsInsideSettings);
+        SetActive(menuBack, false);
+        SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, false);
+        SetActive(creditsPanel, true);
+        HideGameplayUI();
+
+        if (creditsPanel != null)
+            creditsPanel.transform.SetAsLastSibling();
+    }
+
+    public void BackFromCredits()
+    {
+        if (!gameStarted)
+            return;
+
+        bool creditsInsideSettings = creditsPanel != null && settingsPanel != null &&
+                                     creditsPanel.transform.IsChildOf(settingsPanel.transform);
+
+        SetActive(creditsPanel, false);
+        SetActive(pausePanel, true);
+        SetActive(pauseMenu, !creditsInsideSettings);
+        SetActive(settingsPanel, creditsInsideSettings);
+        SetActive(menuBack, creditsInsideSettings);
+        SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, true);
+        HideGameplayUI();
+    }
+
+    public void BindCreditsButtons()
+    {
+        if (infoCreditsButton != null)
+        {
+            infoCreditsButton.onClick.RemoveListener(OpenCredits);
+            infoCreditsButton.onClick.AddListener(OpenCredits);
+        }
+
+        if (creditsBackButton != null)
+        {
+            creditsBackButton.onClick.RemoveListener(BackFromCredits);
+            creditsBackButton.onClick.AddListener(BackFromCredits);
+        }
     }
 
     public void BackToPauseMenu()
@@ -175,6 +240,8 @@ public class UIManager : MonoBehaviour
         SetActive(pauseMenu, true);
         SetActive(settingsPanel, false);
         SetActive(menuBack, false);
+        SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, true);
+        SetActive(creditsPanel, false);
         HideGameplayUI();
     }
 
@@ -189,6 +256,8 @@ public class UIManager : MonoBehaviour
         SetActive(pauseMenu, false);
         SetActive(settingsPanel, true);
         SetActive(menuBack, true);
+        SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, true);
+        SetActive(creditsPanel, false);
         HideGameplayUI();
     }
 
@@ -290,6 +359,8 @@ public class UIManager : MonoBehaviour
         SetActive(pauseMenu, false);
         SetActive(settingsPanel, false);
         SetActive(menuBack, false);
+        SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, false);
+        SetActive(creditsPanel, false);
     }
 
     public void SetActive(GameObject target, bool active)

@@ -116,6 +116,7 @@ public static class InspectorReferenceSetup
             uiManager.liveKillsText = FindChildComponent<Text>(uiManager.scoreBarRect, "LiveKillValue");
             uiManager.liveTimeText = FindChildComponent<Text>(uiManager.scoreBarRect, "LiveTimeValue");
             uiManager.cinzelFont = FindCinzelFont();
+            SetupCreditsUI(scene, uiManager);
             uiManager.BuildHUD();
             uiManager.ResetHUDCache();
             uiManager.UpdateHUD();
@@ -166,6 +167,179 @@ public static class InspectorReferenceSetup
             EditorUtility.SetDirty(enemySpawner);
         }
 
+    }
+
+    public static void SetupCreditsUI(Scene scene, UIManager uiManager)
+    {
+        GameObject pausePanel = FindObject(scene, "PausePanel");
+        if (pausePanel == null || uiManager == null)
+            return;
+
+        GameObject settingsPanel = FindObject(scene, "SettingsPanel");
+        Transform creditsParent = pausePanel.transform;
+        Transform infoParent = pausePanel.transform;
+        if (scene.name == "Main_Use_Scene" && settingsPanel != null)
+        {
+            creditsParent = settingsPanel.transform;
+            infoParent = settingsPanel.transform;
+        }
+
+        Sprite infoSprite = AssetDatabase.LoadAssetAtPath<Sprite>(
+            "Assets/UI_Metirial/info_credit/infoBtn.png");
+        Sprite creditsSprite = AssetDatabase.LoadAssetAtPath<Sprite>(
+            "Assets/UI_Metirial/info_credit/gameCredits.png");
+        Sprite creditsBackSprite = AssetDatabase.LoadAssetAtPath<Sprite>(
+            "Assets/UI_Metirial/setting/menuBack.png");
+
+        GameObject infoObject = FindObject(scene, "infoCredits");
+        if (infoObject == null)
+        {
+            infoObject = new GameObject(
+                "infoCredits", typeof(RectTransform), typeof(CanvasRenderer),
+                typeof(Image), typeof(Button));
+        }
+
+        if (infoObject.transform.parent != infoParent)
+            infoObject.transform.SetParent(infoParent, false);
+
+        RectTransform infoRect = infoObject.GetComponent<RectTransform>();
+        infoRect.anchorMin = infoRect.anchorMax = new Vector2(0.5f, 0.5f);
+        infoRect.pivot = new Vector2(0.5f, 0.5f);
+        infoRect.anchoredPosition = new Vector2(395f, 243.5f);
+        infoRect.sizeDelta = new Vector2(100f, 100f);
+        infoRect.localScale = Vector3.one * 0.71717f;
+
+        Image infoImage = infoObject.GetComponent<Image>();
+        if (infoImage == null)
+            infoImage = infoObject.AddComponent<Image>();
+
+        infoImage.sprite = infoSprite;
+        infoImage.color = Color.white;
+        infoImage.preserveAspect = true;
+        infoImage.raycastTarget = true;
+
+        Button infoButton = infoObject.GetComponent<Button>();
+        if (infoButton == null)
+            infoButton = infoObject.AddComponent<Button>();
+
+        infoButton.targetGraphic = infoImage;
+        Navigation infoNavigation = infoButton.navigation;
+        infoNavigation.mode = Navigation.Mode.None;
+        infoButton.navigation = infoNavigation;
+
+        GameObject creditsPanel = FindObject(scene, "CreditsPanel");
+        if (creditsPanel == null)
+        {
+            creditsPanel = new GameObject(
+                "CreditsPanel", typeof(RectTransform), typeof(CanvasRenderer),
+                typeof(Image), typeof(CanvasGroup));
+        }
+
+        if (creditsPanel.transform.parent != creditsParent)
+            creditsPanel.transform.SetParent(creditsParent, false);
+
+        RectTransform panelRect = creditsPanel.GetComponent<RectTransform>();
+        panelRect.anchorMin = Vector2.zero;
+        panelRect.anchorMax = Vector2.one;
+        panelRect.pivot = new Vector2(0.5f, 0.5f);
+        panelRect.offsetMin = new Vector2(-300f, -300f);
+        panelRect.offsetMax = new Vector2(300f, 300f);
+        panelRect.localScale = Vector3.one;
+
+        Image blocker = creditsPanel.GetComponent<Image>();
+        blocker.sprite = null;
+        blocker.color = new Color(0f, 0f, 0f, 0.84f);
+        blocker.raycastTarget = true;
+
+        CanvasGroup group = creditsPanel.GetComponent<CanvasGroup>();
+        if (group == null)
+            group = creditsPanel.AddComponent<CanvasGroup>();
+        group.alpha = 1f;
+        group.interactable = true;
+        group.blocksRaycasts = true;
+
+        GameObject creditsCard = null;
+        Transform cardTransform = creditsPanel.transform.Find("CreditsCard");
+        if (cardTransform != null)
+            creditsCard = cardTransform.gameObject;
+
+        if (creditsCard == null)
+        {
+            Image[] oldImages = infoObject.GetComponentsInChildren<Image>(true);
+            foreach (Image oldImage in oldImages)
+            {
+                if (oldImage.gameObject != infoObject && oldImage.sprite == creditsSprite)
+                {
+                    creditsCard = oldImage.gameObject;
+                    creditsCard.name = "CreditsCard";
+                    creditsCard.transform.SetParent(creditsPanel.transform, false);
+                    break;
+                }
+            }
+        }
+
+        if (creditsCard == null)
+        {
+            creditsCard = new GameObject(
+                "CreditsCard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            creditsCard.transform.SetParent(creditsPanel.transform, false);
+        }
+
+        creditsCard.SetActive(true);
+        RectTransform cardRect = creditsCard.GetComponent<RectTransform>();
+        cardRect.anchorMin = cardRect.anchorMax = cardRect.pivot = new Vector2(0.5f, 0.5f);
+        cardRect.anchoredPosition = Vector2.zero;
+        cardRect.sizeDelta = new Vector2(981f, 780f);
+        cardRect.localScale = Vector3.one;
+
+        Image cardImage = creditsCard.GetComponent<Image>();
+        cardImage.sprite = creditsSprite;
+        cardImage.color = Color.white;
+        cardImage.preserveAspect = true;
+        cardImage.raycastTarget = false;
+
+        GameObject backObject = FindObject(scene, "creditsBackBtn");
+        if (backObject == null)
+        {
+            backObject = new GameObject(
+                "creditsBackBtn", typeof(RectTransform), typeof(CanvasRenderer),
+                typeof(Image), typeof(Button));
+            backObject.transform.SetParent(creditsPanel.transform, false);
+        }
+        else if (backObject.transform.parent != creditsPanel.transform)
+        {
+            backObject.transform.SetParent(creditsPanel.transform, false);
+        }
+
+        RectTransform backRect = backObject.GetComponent<RectTransform>();
+        backRect.anchorMin = backRect.anchorMax = backRect.pivot = new Vector2(0.5f, 0.5f);
+        backRect.anchoredPosition = new Vector2(0f, -280f);
+        backRect.sizeDelta = new Vector2(500f, 100f);
+        backRect.localScale = Vector3.one;
+
+        Image backImage = backObject.GetComponent<Image>();
+        backImage.sprite = creditsBackSprite;
+        backImage.color = Color.white;
+        backImage.preserveAspect = true;
+        backImage.raycastTarget = true;
+
+        backObject.transform.SetAsLastSibling();
+
+        Button backButton = backObject.GetComponent<Button>();
+        backButton.targetGraphic = backImage;
+        Navigation backNavigation = backButton.navigation;
+        backNavigation.mode = Navigation.Mode.None;
+        backButton.navigation = backNavigation;
+
+        uiManager.infoCreditsButton = infoButton;
+        uiManager.creditsPanel = creditsPanel;
+        uiManager.creditsBackButton = backButton;
+        uiManager.BindCreditsButtons();
+
+        creditsPanel.SetActive(false);
+        EditorUtility.SetDirty(infoObject);
+        EditorUtility.SetDirty(creditsPanel);
+        EditorUtility.SetDirty(uiManager);
     }
 
     public static T FindComponent<T>(Scene scene) where T : Component
