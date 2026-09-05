@@ -93,15 +93,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2298840467832893401, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: m_LocalScale.x
-      value: 2.2
+      value: 9.51
       objectReference: {fileID: 0}
     - target: {fileID: 2298840467832893401, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: m_LocalScale.y
-      value: 2.2
+      value: 9.51
       objectReference: {fileID: 0}
     - target: {fileID: 2298840467832893401, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: m_LocalScale.z
-      value: 2.2
+      value: 9.51
       objectReference: {fileID: 0}
     - target: {fileID: 2298840467832893401, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: m_LocalPosition.x
@@ -144,24 +144,56 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
+      propertyPath: bobHeight
+      value: 0.12
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: moveSpeed
-      value: 1
+      value: 3.56
       objectReference: {fileID: 0}
     - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: turnSpeed
       value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
+      propertyPath: patrolRadius
+      value: 12.77
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: stopDistance
-      value: 0.2
+      value: 0.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
+      propertyPath: minimumYScale
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: separationRadius
-      value: 0.1
+      value: 1.54
       objectReference: {fileID: 0}
     - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: separationStrength
-      value: 0.3
+      value: 0.16
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
+      propertyPath: animationReturnSpeed
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
+      propertyPath: movementAnimationType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
+      propertyPath: patrolSpeedMultiplier
+      value: 0.504
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
+      propertyPath: stationaryDespawnTime
+      value: 3.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
+      propertyPath: movementAnimationSpeed
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -179,6 +211,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1489793816998753635, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2580297467111457659}
+    - targetCorrespondingSourceObject: {fileID: 1489793816998753635, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7300000000000000002}
   m_SourcePrefab: {fileID: 100100000, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
 --- !u!4 &3607364574923128939 stripped
 Transform:
@@ -233,3 +268,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDamageTrigger
   enemyDamage: {fileID: 0}
+--- !u!114 &7300000000000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4126491720301894353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a105577fae661d64a953797b466370f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  maxHealth: 100
+  currentHealth: 100
+  isDead: 0
+  hitColor: {r: 0.98490566, g: 0.26573864, b: 0.26573864, a: 1}
+  hitColorOpacity: 0.688
+  hitFlashDuration: 0.12
+  deathFallRotation: {x: 0, y: 0, z: -90}
+  deathFallDuration: 0.45
+  deathDisappearDelay: 0.25

@@ -11,7 +11,6 @@ public class PlayerStats : MonoBehaviour
     public float expPerKill = 10f;
 
     public float attack = 25f;
-    public float attackSpeed = 1f;
     public float speedIncreaseEveryFiveLevels = 0.5f;
 
     public bool isDead = false;
@@ -73,11 +72,6 @@ public class PlayerStats : MonoBehaviour
     public void IncreaseAttack(float amount)
     {
         attack += amount;
-    }
-
-    public void IncreaseAttackSpeed(float amount)
-    {
-        attackSpeed += amount;
     }
 
     public void AddExperience(float amount)

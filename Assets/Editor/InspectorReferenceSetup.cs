@@ -92,6 +92,9 @@ public static class InspectorReferenceSetup
             musicManager.sceneGameManager = gameManager;
             musicManager.bgmSlider = FindComponentByName<Slider>(scene, "bgmSlider");
             musicManager.sfxSlider = FindComponentByName<Slider>(scene, "sfxSlider");
+            musicManager.volumeBarSprite = AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/UI_Metirial/setting/menuSettingVolBar.png");
+            musicManager.SetupVolumeBars();
             EditorUtility.SetDirty(musicManager);
         }
 
@@ -120,8 +123,24 @@ public static class InspectorReferenceSetup
             uiManager.BuildHUD();
             uiManager.ResetHUDCache();
             uiManager.UpdateHUD();
-            uiManager.BuildLevelUpUI();
-            uiManager.SetLevelUpOverlayActive(false);
+
+            if (scene.name == "InGameScene")
+            {
+                uiManager.BuildLevelUpUI();
+                uiManager.SetLevelUpOverlayActive(false);
+            }
+            else
+            {
+                GameObject levelUpOverlay = FindObject(scene, "LevelUpChoiceOverlay");
+                if (levelUpOverlay != null)
+                    Object.DestroyImmediate(levelUpOverlay, true);
+
+                uiManager.levelUpOverlay = null;
+                uiManager.leftChoiceButton = null;
+                uiManager.rightChoiceButton = null;
+                uiManager.levelUpPlayer = null;
+                uiManager.levelUpSelectionOpen = false;
+            }
 
             EditorUtility.SetDirty(uiManager);
         }
@@ -187,7 +206,7 @@ public static class InspectorReferenceSetup
         Sprite infoSprite = AssetDatabase.LoadAssetAtPath<Sprite>(
             "Assets/UI_Metirial/info_credit/infoBtn.png");
         Sprite creditsSprite = AssetDatabase.LoadAssetAtPath<Sprite>(
-            "Assets/UI_Metirial/info_credit/gameCredits.png");
+            "Assets/UI_Metirial/info_credit/gameCreditsNew.png");
         Sprite creditsBackSprite = AssetDatabase.LoadAssetAtPath<Sprite>(
             "Assets/UI_Metirial/setting/menuBack.png");
 

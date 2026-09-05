@@ -85,15 +85,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8240507272362247669, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
       propertyPath: m_LocalScale.x
-      value: 2.2
+      value: 9.51
       objectReference: {fileID: 0}
     - target: {fileID: 8240507272362247669, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
       propertyPath: m_LocalScale.y
-      value: 2.2
+      value: 9.51
       objectReference: {fileID: 0}
     - target: {fileID: 8240507272362247669, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
       propertyPath: m_LocalScale.z
-      value: 2.2
+      value: 9.51
       objectReference: {fileID: 0}
     - target: {fileID: 8240507272362247669, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
       propertyPath: m_LocalPosition.x
@@ -101,7 +101,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8240507272362247669, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.0719352
+      value: 3.15
       objectReference: {fileID: 0}
     - target: {fileID: 8240507272362247669, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
       propertyPath: m_LocalPosition.z
@@ -144,24 +144,56 @@ PrefabInstance:
       value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
+      propertyPath: bobHeight
+      value: 0.12
+      objectReference: {fileID: 0}
+    - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
       propertyPath: moveSpeed
-      value: 1
+      value: 3.56
       objectReference: {fileID: 0}
     - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
       propertyPath: turnSpeed
       value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
+      propertyPath: patrolRadius
+      value: 12.77
+      objectReference: {fileID: 0}
+    - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
       propertyPath: stopDistance
-      value: 0.2
+      value: 0.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
+      propertyPath: minimumYScale
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
       propertyPath: separationRadius
-      value: 0.1
+      value: 1.54
       objectReference: {fileID: 0}
     - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
       propertyPath: separationStrength
-      value: 0.3
+      value: 0.16
+      objectReference: {fileID: 0}
+    - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
+      propertyPath: animationReturnSpeed
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
+      propertyPath: movementAnimationType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
+      propertyPath: patrolSpeedMultiplier
+      value: 0.504
+      objectReference: {fileID: 0}
+    - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
+      propertyPath: stationaryDespawnTime
+      value: 3.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9007016923417018269, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
+      propertyPath: movementAnimationSpeed
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -179,6 +211,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8725716688162299727, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4356300490047150975}
+    - targetCorrespondingSourceObject: {fileID: 8725716688162299727, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7300000000000000001}
   m_SourcePrefab: {fileID: 100100000, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}
 --- !u!1 &1717232688710020730 stripped
 GameObject:
@@ -228,6 +263,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDamageTrigger
   enemyDamage: {fileID: 0}
+--- !u!114 &7300000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1717232688710020730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a105577fae661d64a953797b466370f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  maxHealth: 100
+  currentHealth: 100
+  isDead: 0
+  hitColor: {r: 0.98490566, g: 0.26573864, b: 0.26573864, a: 1}
+  hitColorOpacity: 0.688
+  hitFlashDuration: 0.12
+  deathFallRotation: {x: 0, y: 0, z: -90}
+  deathFallDuration: 0.45
+  deathDisappearDelay: 0.25
 --- !u!4 &2062374458715256000 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8240507272362247669, guid: b6b9a7ef35778574b9a3afc0afb26363, type: 3}

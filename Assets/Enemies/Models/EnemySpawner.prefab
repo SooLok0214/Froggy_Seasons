@@ -50,13 +50,20 @@ MonoBehaviour:
   - {fileID: 8152834368353769456, guid: ca27f2de10f2c48408eee1f4c6d1c9b0, type: 3}
   - {fileID: 2783528891001899571, guid: 99f1badc2ef5a2f4d8ce5e50c76e7bff, type: 3}
   player: {fileID: 0}
-  difficultyInterval: 45
-  damagePerTier: 2
-  healthPerTier: 10
-  speedPerTier: 0.002
-  enemyLifeTime: 10
-  spawnTime: 0.2
-  minSpawnDistance: 1
-  maxSpawnDistance: 60
+  difficultyInterval: 30
+  damagePerTier: 5
+  healthPerTier: 50
+  speedPerTier: 0.005
+  enemyLifeTime: 20
+  spawnTime: 1
+  minSpawnDistance: 4
+  maxSpawnDistance: 30
   spawnY: 3.05
-  maxEnemies: 150
+  maxEnemies: 50
+  minPlayerSpawnDistance: 10
+  spawnPositionAttempts: 24
+  spawnGroundClearance: 0.03
+  groundSearchHeight: 50
+  groundSearchDepth: 100
+  spawning: 0
+  spawnedEnemies: []

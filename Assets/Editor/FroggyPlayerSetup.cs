@@ -413,10 +413,6 @@ public static class FroggyPlayerSetup
         if (deadplace == null)
             deadplace = triggerObject.AddComponent<Deadplace>();
 
-        GameObject uiManagerObject = FindSceneObject(scene, "UIManager");
-        if (uiManagerObject != null)
-            deadplace.uiManager = uiManagerObject.GetComponent<UIManager>();
-
         if (oldDeadplace != null)
             EditorUtility.SetDirty(oldDeadplace);
         EditorUtility.SetDirty(triggerObject);

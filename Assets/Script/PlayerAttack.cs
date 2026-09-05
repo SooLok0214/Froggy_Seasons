@@ -143,17 +143,6 @@ public class PlayerAttack : MonoBehaviour
 
         nextFireTime = Time.time + fireCooldown;
 
-        Vector3 direction = transform.forward;
-
-        if (aimCamera != null)
-        {
-            Ray aimRay = aimCamera.ViewportPointToRay(
-                new Vector3(0.5f, 0.5f, 0f)
-            );
-
-            direction = aimRay.direction.normalized;
-        }
-
         Vector3 spawnPosition =
             transform.position +
             transform.TransformDirection(
@@ -181,11 +170,7 @@ public class PlayerAttack : MonoBehaviour
         Rigidbody projectileBody =
             projectile.AddComponent<Rigidbody>();
 
-        projectileBody.useGravity = false;
-        projectileBody.collisionDetectionMode =
-            CollisionDetectionMode.ContinuousDynamic;
-        projectileBody.linearVelocity =
-            direction * projectileSpeed;
+        LaunchProjectile(projectileBody);
 
         MagicProjectile magicProjectile =
             projectile.AddComponent<MagicProjectile>();
@@ -200,6 +185,28 @@ public class PlayerAttack : MonoBehaviour
 
         if (MusicManager.instance != null)
             MusicManager.instance.PlayFireSfx();
+    }
+
+    public Vector3 GetFireDirection()
+    {
+        Vector3 direction = aimCamera != null
+            ? aimCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f)).direction
+            : transform.forward;
+        direction.y = 0f;
+        // Looking straight up/down has no horizontal aim; use player facing.
+        if (direction.sqrMagnitude < 0.0001f)
+            direction = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
+        if (direction.sqrMagnitude < 0.0001f)
+            direction = Vector3.forward;
+        return direction.normalized;
+    }
+
+    public void LaunchProjectile(Rigidbody projectileBody)
+    {
+        projectileBody.useGravity = false;
+        projectileBody.constraints |= RigidbodyConstraints.FreezePositionY;
+        projectileBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        projectileBody.linearVelocity = GetFireDirection() * projectileSpeed;
     }
 
 }
@@ -255,7 +262,7 @@ public class MagicProjectile : MonoBehaviour
         {
             EnemyHealth health = enemy.GetComponent<EnemyHealth>();
             if (health == null)
-                health = enemy.gameObject.AddComponent<EnemyHealth>();
+                return;
 
             hasHit = true;
             health.TakeDamage(damage);

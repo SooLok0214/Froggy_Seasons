@@ -3,16 +3,12 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-[InitializeOnLoad]
 public static class MobileColliderOptimizer
 {
     public const string SceneName = "InGameScene";
     public const string MapName = "FourSeasonsWorldMap";
 
-    static MobileColliderOptimizer()
-    {
-        EditorApplication.delayCall += OptimizeOpenScene;
-    }
+    // Explicit menu action only. Reloading scripts must never rewrite colliders.
 
     [MenuItem("Tools/Froggy Seasons/Optimize Mobile Colliders")]
     public static void OptimizeOpenScene()
@@ -37,6 +33,11 @@ public static class MobileColliderOptimizer
                 continue;
 
             GameObject target = meshCollider.gameObject;
+            // Mountain collision is authored manually; never replace its shape
+            // with the mesh bounds, which can block large parts of the map.
+            if (IsMountain(target.transform, map.transform))
+                continue;
+
             MeshFilter meshFilter = target.GetComponent<MeshFilter>();
             if (meshFilter == null || meshFilter.sharedMesh == null)
                 continue;
@@ -80,6 +81,16 @@ public static class MobileColliderOptimizer
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         Debug.Log($"[Mobile Colliders] Added {addedBoxes} BoxColliders and removed {removedMeshes} MeshColliders. Special trigger/boundary colliders were preserved.");
+    }
+
+    private static bool IsMountain(Transform target, Transform map)
+    {
+        for (Transform current = target; current != null; current = current.parent)
+        {
+            if (current.name == "\u5C71") return true;
+            if (current == map) break;
+        }
+        return false;
     }
 
     public static GameObject FindSceneObject(Scene scene, string objectName)

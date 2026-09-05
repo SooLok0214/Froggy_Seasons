@@ -13,6 +13,10 @@ public class GameManager : MonoBehaviour
     public MusicManager musicManager;
     public EnemySpawner enemySpawner;
 
+    [Header("Scene Loading")]
+    [Tooltip("Loading UI used for scene changes between the main menu and gameplay.")]
+    public LoadingScreenController loadingScreen;
+
     public bool gameStarted;
 
     public void Awake()
@@ -35,6 +39,15 @@ public class GameManager : MonoBehaviour
 
         if (SceneManager.GetActiveScene().name != GameplayScene)
         {
+            if (loadingScreen == null)
+                loadingScreen = FindAnyObjectByType<LoadingScreenController>(FindObjectsInactive.Include);
+
+            if (loadingScreen != null)
+            {
+                loadingScreen.LoadScene(GameplayScene);
+                return;
+            }
+
             SceneManager.LoadScene(GameplayScene);
             return;
         }
@@ -97,6 +110,15 @@ public class GameManager : MonoBehaviour
 
         if (SceneManager.GetActiveScene().name == GameplayScene)
         {
+            if (loadingScreen == null)
+                loadingScreen = FindAnyObjectByType<LoadingScreenController>(FindObjectsInactive.Include);
+
+            if (loadingScreen != null)
+            {
+                loadingScreen.LoadScene(MainMenuScene);
+                return;
+            }
+
             SceneManager.LoadScene(MainMenuScene);
             return;
         }
@@ -112,7 +134,7 @@ public class GameManager : MonoBehaviour
         if (uiManager != null)
             uiManager.ShowMainMenuUI();
 
-        if (musicManager != null)
+        if (musicManager != null && !BootLogoSplash.IsShowing)
             musicManager.PlayHomeMusic();
     }
 }

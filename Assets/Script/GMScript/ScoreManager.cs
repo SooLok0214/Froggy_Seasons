@@ -147,12 +147,6 @@ public class ScoreManager : MonoBehaviour
     }
 
 
-    public void LevelUp()
-    {
-        SetLevel(currentLevel + 1);
-    }
-
-
     public void BuildScoreDisplay()
     {
         if (scorePanel == null)

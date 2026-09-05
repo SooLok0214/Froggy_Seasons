@@ -27,7 +27,23 @@ public class UIManager : MonoBehaviour
     public GameObject creditsPanel;
     public Button creditsBackButton;
 
+    [Header("Tutorial")]
+    public Button homeTutorialButton;
+    public GameObject tutorialPanel;
+    public Button tutorialPreviousButton;
+    public Button tutorialNextButton;
+    public Text tutorialPageText;
+    public Image tutorialContent;
+    [Min(1)] public int tutorialPageCount = 5;
+    public Sprite[] tutorialPages;
+    public int currentTutorialPage;
+
     public GameObject gameOverPanel;
+
+    [Header("Overlay Layout")]
+    [Range(0.5f, 2f)] public float overlayPanelScale = 1.15f;
+    public float menuBackBaseScale = 0.6f;
+    public float menuBackBaseY = -231.7f;
 
     // Gameplay UI
     public GameObject joystickObject;
@@ -68,6 +84,7 @@ public class UIManager : MonoBehaviour
 
     public bool gameStarted;
     public bool settingsOpenedFromHome;
+    public bool tutorialOpenedFromHome;
 
     [System.NonSerialized] public int displayedKills = -1;
     [System.NonSerialized] public int displayedTime = -1;
@@ -79,13 +96,25 @@ public class UIManager : MonoBehaviour
 
     public void Start()
     {
+        ApplyOverlayLayout();
         BindCreditsButtons();
+        BindTutorialButtons();
         BuildHUD();
-        BuildLevelUpUI();
-        SetLevelUpOverlayActive(false);
+        if (playerStats != null)
+        {
+            BuildLevelUpUI();
+            SetLevelUpOverlayActive(false);
+        }
         SetActive(creditsPanel, false);
+        SetActive(tutorialPanel, false);
         ResetHUDCache();
         UpdateHUD();
+    }
+
+    private void OnValidate()
+    {
+        if (!Application.isPlaying)
+            ApplyOverlayLayout();
     }
 
     public void Update()
@@ -99,17 +128,12 @@ public class UIManager : MonoBehaviour
             GameManager.instance.StartGame();
     }
 
-    public void BeginGameplayScene()
-    {
-        if (GameManager.instance != null)
-            GameManager.instance.GameStart();
-    }
-
     // 只處理遊戲開始時的 UI，由 GameManager 呼叫。
     public void GameStartUI()
     {
         gameStarted = true;
         settingsOpenedFromHome = false;
+        tutorialOpenedFromHome = false;
 
         SetActive(startPanel, false);
         SetActive(homeMenu, false);
@@ -130,7 +154,7 @@ public class UIManager : MonoBehaviour
 
     public void PauseResume()
     {
-        if (!gameStarted)
+        if (!gameStarted && !settingsOpenedFromHome)
             return;
 
         bool pausing = Time.timeScale == 1;
@@ -145,6 +169,7 @@ public class UIManager : MonoBehaviour
             SetActive(pausePanel, true);
             SetActive(pauseMenu, true);
             SetActive(settingsPanel, false);
+            SetActive(tutorialPanel, false);
             SetActive(menuBack, false);
             SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, true);
             SetActive(creditsPanel, false);
@@ -164,8 +189,10 @@ public class UIManager : MonoBehaviour
             return;
 
         settingsOpenedFromHome = false;
+        tutorialOpenedFromHome = false;
         SetActive(pauseMenu, false);
         SetActive(settingsPanel, true);
+        SetActive(tutorialPanel, false);
         SetActive(menuBack, true);
         SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, false);
         SetActive(creditsPanel, false);
@@ -174,7 +201,7 @@ public class UIManager : MonoBehaviour
 
     public void OpenCredits()
     {
-        if (!gameStarted)
+        if (!gameStarted && !settingsOpenedFromHome)
             return;
 
         bool creditsInsideSettings = creditsPanel != null && settingsPanel != null &&
@@ -185,9 +212,11 @@ public class UIManager : MonoBehaviour
         SetActive(pausePanel, true);
         SetActive(pauseMenu, false);
         SetActive(settingsPanel, creditsInsideSettings);
-        SetActive(menuBack, false);
+        SetActive(tutorialPanel, false);
+        SetActive(menuBack, true);
         SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, false);
         SetActive(creditsPanel, true);
+        SetActive(creditsBackButton == null ? null : creditsBackButton.gameObject, false);
         HideGameplayUI();
 
         if (creditsPanel != null)
@@ -196,7 +225,7 @@ public class UIManager : MonoBehaviour
 
     public void BackFromCredits()
     {
-        if (!gameStarted)
+        if (!gameStarted && !settingsOpenedFromHome)
             return;
 
         bool creditsInsideSettings = creditsPanel != null && settingsPanel != null &&
@@ -206,6 +235,7 @@ public class UIManager : MonoBehaviour
         SetActive(pausePanel, true);
         SetActive(pauseMenu, !creditsInsideSettings);
         SetActive(settingsPanel, creditsInsideSettings);
+        SetActive(tutorialPanel, false);
         SetActive(menuBack, creditsInsideSettings);
         SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, true);
         HideGameplayUI();
@@ -228,9 +258,16 @@ public class UIManager : MonoBehaviour
 
     public void BackToPauseMenu()
     {
-        if (settingsOpenedFromHome || !gameStarted)
+        if (creditsPanel != null && creditsPanel.activeSelf)
+        {
+            BackFromCredits();
+            return;
+        }
+
+        if (settingsOpenedFromHome || tutorialOpenedFromHome || !gameStarted)
         {
             settingsOpenedFromHome = false;
+            tutorialOpenedFromHome = false;
             HidePauseUI();
             SetActive(homeMenu, true);
             HideGameplayUI();
@@ -239,6 +276,7 @@ public class UIManager : MonoBehaviour
 
         SetActive(pauseMenu, true);
         SetActive(settingsPanel, false);
+        SetActive(tutorialPanel, false);
         SetActive(menuBack, false);
         SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, true);
         SetActive(creditsPanel, false);
@@ -251,20 +289,145 @@ public class UIManager : MonoBehaviour
             return;
 
         settingsOpenedFromHome = true;
+        tutorialOpenedFromHome = false;
         SetActive(homeMenu, false);
         SetActive(pausePanel, true);
         SetActive(pauseMenu, false);
         SetActive(settingsPanel, true);
+        SetActive(tutorialPanel, false);
         SetActive(menuBack, true);
         SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, true);
         SetActive(creditsPanel, false);
         HideGameplayUI();
     }
 
-    public void GameOver()
+    public void OpenHomeTutorial()
     {
-        if (GameManager.instance != null)
-            GameManager.instance.GameOver();
+        if (gameStarted)
+            return;
+
+        settingsOpenedFromHome = false;
+        tutorialOpenedFromHome = true;
+        currentTutorialPage = 0;
+
+        SetActive(homeMenu, false);
+        SetActive(pausePanel, true);
+        SetActive(pauseMenu, false);
+        SetActive(settingsPanel, false);
+        SetActive(creditsPanel, false);
+        SetActive(tutorialPanel, true);
+        SetActive(menuBack, true);
+        SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, false);
+        HideGameplayUI();
+        UpdateTutorialPage();
+
+        if (tutorialPanel != null)
+            tutorialPanel.transform.SetAsLastSibling();
+    }
+
+    public void TutorialPreviousPage()
+    {
+        if (currentTutorialPage <= 0)
+            return;
+
+        currentTutorialPage--;
+        UpdateTutorialPage();
+        PlayUIClick();
+    }
+
+    public void TutorialNextPage()
+    {
+        int total = Mathf.Max(1, tutorialPageCount);
+        if (currentTutorialPage >= total - 1)
+            return;
+
+        currentTutorialPage++;
+        UpdateTutorialPage();
+        PlayUIClick();
+    }
+
+    public void BindTutorialButtons()
+    {
+        if (tutorialContent != null)
+        {
+            TutorialImageZoom zoom = tutorialContent.GetComponent<TutorialImageZoom>();
+            if (zoom == null)
+                zoom = tutorialContent.gameObject.AddComponent<TutorialImageZoom>();
+            zoom.Initialize();
+        }
+
+        if (homeTutorialButton != null)
+        {
+            homeTutorialButton.onClick.RemoveListener(OpenHomeTutorial);
+            homeTutorialButton.onClick.AddListener(OpenHomeTutorial);
+        }
+
+        if (tutorialPreviousButton != null)
+        {
+            tutorialPreviousButton.onClick.RemoveListener(TutorialPreviousPage);
+            tutorialPreviousButton.onClick.AddListener(TutorialPreviousPage);
+        }
+
+        if (tutorialNextButton != null)
+        {
+            tutorialNextButton.onClick.RemoveListener(TutorialNextPage);
+            tutorialNextButton.onClick.AddListener(TutorialNextPage);
+        }
+    }
+
+    public void UpdateTutorialPage()
+    {
+        CloseTutorialImageZoom();
+        int total = Mathf.Max(1, tutorialPageCount);
+        currentTutorialPage = Mathf.Clamp(currentTutorialPage, 0, total - 1);
+
+        if (tutorialPageText != null)
+            tutorialPageText.text = (currentTutorialPage + 1) + "/" + total;
+
+        Sprite pageSprite = tutorialPages != null && currentTutorialPage < tutorialPages.Length
+            ? tutorialPages[currentTutorialPage]
+            : null;
+
+        if (tutorialContent != null)
+        {
+            tutorialContent.sprite = pageSprite;
+            tutorialContent.color = pageSprite == null ? Color.black : Color.white;
+            tutorialContent.preserveAspect = true;
+        }
+
+        SetActive(tutorialPreviousButton == null ? null : tutorialPreviousButton.gameObject,
+            currentTutorialPage > 0);
+        SetActive(tutorialNextButton == null ? null : tutorialNextButton.gameObject,
+            currentTutorialPage < total - 1);
+    }
+
+    private void PlayUIClick()
+    {
+        if (MusicManager.instance != null)
+            MusicManager.instance.PlayButtonClick();
+    }
+
+    private void CloseTutorialImageZoom()
+    {
+        if (tutorialContent != null)
+            tutorialContent.GetComponent<TutorialImageZoom>()?.Close();
+    }
+
+    public void ApplyOverlayLayout()
+    {
+        overlayPanelScale = Mathf.Max(0.01f, overlayPanelScale);
+
+        if (pausePanel != null)
+            pausePanel.transform.localScale = Vector3.one * overlayPanelScale;
+
+        if (menuBack != null && menuBack.transform is RectTransform backRect)
+        {
+            float scale = menuBackBaseScale * overlayPanelScale;
+            backRect.localScale = new Vector3(scale, scale, scale);
+            Vector2 position = backRect.anchoredPosition;
+            position.y = menuBackBaseY * overlayPanelScale;
+            backRect.anchoredPosition = position;
+        }
     }
 
     // 只處理死亡時的 UI，由 GameManager 呼叫。
@@ -272,6 +435,7 @@ public class UIManager : MonoBehaviour
     {
         gameStarted = false;
         settingsOpenedFromHome = false;
+        tutorialOpenedFromHome = false;
 
         HidePauseUI();
         HideGameplayUI();
@@ -293,14 +457,24 @@ public class UIManager : MonoBehaviour
 
     public void BackToStartMenu()
     {
+        gameStarted = false;
+        settingsOpenedFromHome = false;
+        tutorialOpenedFromHome = false;
+
+        // These panels are Canvas siblings of SafeArea, so they would otherwise
+        // remain in front of the LoadingPanel while the main scene is loading.
+        HidePauseUI();
+        SetActive(gameOverPanel, false);
+        CancelLevelUpChoices();
+        HideGameplayUI();
+        HideGameplayObjectsByName();
+        SetCameraGameplayControl(false);
+
+        if (pauseResumeBtn != null)
+            pauseResumeBtn.gameObject.SetActive(false);
+
         if (GameManager.instance != null)
             GameManager.instance.BackToStartMenu();
-    }
-
-    public void ShowMainMenu()
-    {
-        if (GameManager.instance != null)
-            GameManager.instance.ShowMainMenu();
     }
 
     // 只處理首頁 UI，由 GameManager 呼叫。
@@ -308,6 +482,7 @@ public class UIManager : MonoBehaviour
     {
         gameStarted = false;
         settingsOpenedFromHome = false;
+        tutorialOpenedFromHome = false;
 
         SetActive(startPanel, true);
         SetActive(gameOverPanel, false);
@@ -358,6 +533,7 @@ public class UIManager : MonoBehaviour
         SetActive(pausePanel, false);
         SetActive(pauseMenu, false);
         SetActive(settingsPanel, false);
+        SetActive(tutorialPanel, false);
         SetActive(menuBack, false);
         SetActive(infoCreditsButton == null ? null : infoCreditsButton.gameObject, false);
         SetActive(creditsPanel, false);
@@ -366,7 +542,11 @@ public class UIManager : MonoBehaviour
     public void SetActive(GameObject target, bool active)
     {
         if (target != null)
+        {
+            if (!active && target == tutorialPanel)
+                CloseTutorialImageZoom();
             target.SetActive(active);
+        }
     }
 
     public void ShowLevelUpChoices(PlayerStats player)

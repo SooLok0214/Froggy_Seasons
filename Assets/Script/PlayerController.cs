@@ -14,6 +14,12 @@ public class PlayerController : MonoBehaviour
     public Vector3 direction;
     public bool isMoving;
 
+    [Header("PC Controls")]
+    [Tooltip("Use W/A/S/D to move relative to the camera. The mobile joystick keeps priority while dragged.")]
+    public bool enableWASD = true;
+
+    private Vector2 keyboardMovement;
+
     public void Start()
     {
         if (rb == null)
@@ -31,13 +37,48 @@ public class PlayerController : MonoBehaviour
 
     public void Update()
     {
-        if (Keyboard.current != null && Keyboard.current.hKey.wasPressedThisFrame)
+        keyboardMovement = Vector2.zero;
+        Keyboard keyboard = Keyboard.current;
+        if (enableWASD && keyboard != null)
+        {
+            keyboardMovement = new Vector2(
+                (keyboard.dKey.isPressed ? 1f : 0f) - (keyboard.aKey.isPressed ? 1f : 0f),
+                (keyboard.wKey.isPressed ? 1f : 0f) - (keyboard.sKey.isPressed ? 1f : 0f));
+        }
+
+        if (keyboard != null && keyboard.hKey.wasPressedThisFrame)
             MagicHeal();
+    }
+
+    private void OnDisable()
+    {
+        keyboardMovement = Vector2.zero;
     }
 
     public void FixedUpdate()
     {
-        if (variableJoystick == null || rb == null)
+        if (rb == null || Time.timeScale <= 0f)
+            return;
+
+        Vector2 joystickInput = variableJoystick != null
+            ? new Vector2(variableJoystick.Horizontal, variableJoystick.Vertical)
+            : Vector2.zero;
+        Move(ResolveMovementInput(joystickInput, keyboardMovement, enableWASD));
+    }
+
+    // Keep input selection separate so it can be checked without injecting keys
+    // into the Editor or changing the connected gamepad/mobile devices.
+    public static Vector2 ResolveMovementInput(Vector2 joystick, Vector2 keyboard, bool wasdEnabled)
+    {
+        if (joystick.sqrMagnitude > 0.01f || !wasdEnabled)
+            return Vector2.ClampMagnitude(joystick, 1f);
+
+        return Vector2.ClampMagnitude(keyboard, 1f);
+    }
+
+    public void Move(Vector2 input)
+    {
+        if (rb == null || Time.timeScale <= 0f)
             return;
 
         // Movement controls the facing direction. Physics collisions must not leave
@@ -57,8 +98,7 @@ public class PlayerController : MonoBehaviour
             cameraRight.Normalize();
         }
 
-        direction = cameraForward * variableJoystick.Vertical
-            + cameraRight * variableJoystick.Horizontal;
+        direction = cameraForward * input.y + cameraRight * input.x;
 
         isMoving = direction.magnitude > 0.1f;
 
