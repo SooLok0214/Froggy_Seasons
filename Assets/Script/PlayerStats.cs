@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class PlayerStats : MonoBehaviour
 {
+    public const float MaximumHealth = 3000f;
+    public const float MaximumAttack = 500f;
+
     public float maxHealth = 100f;
     public float currentHealth;
 
@@ -24,17 +27,24 @@ public class PlayerStats : MonoBehaviour
 
     public void Start()
     {
+        maxHealth = Mathf.Clamp(maxHealth, 1f, MaximumHealth);
+        attack = Mathf.Clamp(attack, 25f, MaximumAttack);
         currentHealth = maxHealth;
         currentLevel = 1;
         currentExp = 0f;
 
         CacheReferences();
 
-        if (attack < 25f)
-            attack = 25f;
-
         SyncLevelRecord();
         RefreshHUD();
+    }
+
+    public void OnValidate()
+    {
+        maxHealth = Mathf.Clamp(maxHealth, 1f, MaximumHealth);
+        currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
+        attack = Mathf.Clamp(attack, 0f, MaximumAttack);
+        speedIncreaseEveryFiveLevels = Mathf.Max(0f, speedIncreaseEveryFiveLevels);
     }
 
     public void TakeDamage(float damage)
@@ -64,14 +74,21 @@ public class PlayerStats : MonoBehaviour
 
     public void IncreaseMaxHealth(float amount)
     {
-        maxHealth += amount;
-        currentHealth += amount;
+        if (amount <= 0f)
+            return;
+
+        float previousMaxHealth = maxHealth;
+        maxHealth = Mathf.Min(MaximumHealth, maxHealth + amount);
+        currentHealth = Mathf.Min(maxHealth, currentHealth + (maxHealth - previousMaxHealth));
         RefreshHUD();
     }
 
     public void IncreaseAttack(float amount)
     {
-        attack += amount;
+        if (amount <= 0f)
+            return;
+
+        attack = Mathf.Min(MaximumAttack, attack + amount);
     }
 
     public void AddExperience(float amount)
@@ -101,7 +118,7 @@ public class PlayerStats : MonoBehaviour
                 playerController = GetComponent<PlayerController>();
 
             if (playerController != null)
-                playerController.speed += speedIncreaseEveryFiveLevels;
+                playerController.IncreaseSpeed(speedIncreaseEveryFiveLevels);
         }
 
         if (MusicManager.instance != null)

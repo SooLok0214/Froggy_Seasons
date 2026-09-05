@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class EnemyFollowPlayer : MonoBehaviour
 {
+    public const float MaximumMoveSpeed = 9f;
+
     public enum MovementAnimationType
     {
         None,
@@ -110,8 +112,24 @@ public class EnemyFollowPlayer : MonoBehaviour
     private EnemyWaterArea waterDetourArea;
     private int waterDetourSide;
 
+    public float CurrentMoveSpeed => Mathf.Clamp(moveSpeed, 0f, MaximumMoveSpeed);
+
+    public void OnValidate()
+    {
+        moveSpeed = CurrentMoveSpeed;
+    }
+
+    public void IncreaseMoveSpeed(float amount)
+    {
+        if (amount <= 0f)
+            return;
+
+        moveSpeed = Mathf.Min(MaximumMoveSpeed, CurrentMoveSpeed + amount);
+    }
+
     public void Start()
     {
+        moveSpeed = CurrentMoveSpeed;
         rb = GetComponent<Rigidbody>();
         ResetStationaryTimer(rb != null ? rb.position : transform.position);
         BoxCollider body = GetComponent<BoxCollider>();
@@ -282,7 +300,7 @@ public class EnemyFollowPlayer : MonoBehaviour
         Vector3 targetPosition =
             rb.position +
             moveDirection *
-            Mathf.Max(0f, moveSpeed) * (IsChasing ? 1f : Mathf.Clamp01(patrolSpeedMultiplier)) *
+            CurrentMoveSpeed * (IsChasing ? 1f : Mathf.Clamp01(patrolSpeedMultiplier)) *
             Time.fixedDeltaTime;
 
         if (!IsChasing)
@@ -296,7 +314,7 @@ public class EnemyFollowPlayer : MonoBehaviour
                 Vector3 edge = patrolCenter + Vector3.ClampMagnitude(fromCenter, radius);
                 // A radius edited at runtime must not teleport the enemy.
                 Vector2 limited = Vector2.MoveTowards(new Vector2(rb.position.x, rb.position.z),
-                    new Vector2(edge.x, edge.z), Mathf.Max(0f, moveSpeed) * Mathf.Clamp01(patrolSpeedMultiplier) * Time.fixedDeltaTime);
+                    new Vector2(edge.x, edge.z), CurrentMoveSpeed * Mathf.Clamp01(patrolSpeedMultiplier) * Time.fixedDeltaTime);
                 targetPosition.x = limited.x;
                 targetPosition.z = limited.y;
             }

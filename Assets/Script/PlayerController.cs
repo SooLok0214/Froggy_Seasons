@@ -3,8 +3,13 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    public const float MaximumSpeed = 10f;
+
+    [Min(0f)]
     public float speed = 8f;
     public float rotateSpeed = 12f;
+
+    public float CurrentSpeed => Mathf.Clamp(speed, 0f, MaximumSpeed);
 
     public VariableJoystick variableJoystick;
     public Rigidbody rb;
@@ -22,6 +27,8 @@ public class PlayerController : MonoBehaviour
 
     public void Start()
     {
+        speed = CurrentSpeed;
+
         if (rb == null)
             rb = GetComponent<Rigidbody>();
 
@@ -33,6 +40,19 @@ public class PlayerController : MonoBehaviour
 
         if (animator != null)
             animator.applyRootMotion = false;
+    }
+
+    public void OnValidate()
+    {
+        speed = CurrentSpeed;
+    }
+
+    public void IncreaseSpeed(float amount)
+    {
+        if (amount <= 0f)
+            return;
+
+        speed = Mathf.Min(MaximumSpeed, CurrentSpeed + amount);
     }
 
     public void Update()
@@ -110,10 +130,11 @@ public class PlayerController : MonoBehaviour
         if (isMoving)
         {
             direction.Normalize();
+            float movementSpeed = CurrentSpeed;
             rb.linearVelocity = new Vector3(
-                direction.x * speed,
+                direction.x * movementSpeed,
                 velocity.y,
-                direction.z * speed
+                direction.z * movementSpeed
             );
 
             Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);

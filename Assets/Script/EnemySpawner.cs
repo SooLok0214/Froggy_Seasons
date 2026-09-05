@@ -259,8 +259,8 @@ public class EnemyScaling : MonoBehaviour
             enemyHealth.IncreaseMaxHealth(
                 (settings != null ? settings.healthPerTier : 20f) * newTiers);
         if (enemyFollowPlayer != null)
-            enemyFollowPlayer.moveSpeed +=
-                (settings != null ? settings.speedPerTier : 1f) * newTiers;
+            enemyFollowPlayer.IncreaseMoveSpeed(
+                (settings != null ? settings.speedPerTier : 1f) * newTiers);
 
         appliedDifficultyTier = currentTier;
     }

@@ -177,7 +177,9 @@ public class MusicManager : MonoBehaviour
         fillAreaRect.anchorMin = new Vector2(0f, 0.5f);
         fillAreaRect.anchorMax = new Vector2(1f, 0.5f);
         fillAreaRect.pivot = new Vector2(0.5f, 0.5f);
-        fillAreaRect.anchoredPosition = Vector2.zero;
+        // Keep the decorative BarNew image on the Slider root stationary while
+        // aligning only the LineNew fill with the bar's inner track.
+        fillAreaRect.anchoredPosition = new Vector2(-16f, 0f);
         fillAreaRect.sizeDelta = new Vector2(
             -volumeBarHorizontalPadding * 2f,
             volumeBarHeight
@@ -368,13 +370,6 @@ public class MusicManager : MonoBehaviour
                 iconObject = new GameObject("MuteIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
                 iconObject.transform.SetParent(rect, false);
 
-                RectTransform iconRect = iconObject.GetComponent<RectTransform>();
-                iconRect.anchorMin = new Vector2(0f, 0.5f);
-                iconRect.anchorMax = new Vector2(0f, 0.5f);
-                iconRect.pivot = new Vector2(0.5f, 0.5f);
-                iconRect.anchoredPosition = new Vector2(47f, 0f);
-                iconRect.sizeDelta = new Vector2(62f, 62f);
-
                 Image iconImage = iconObject.GetComponent<Image>();
                 iconImage.sprite = GetMuteIconSprite();
                 iconImage.preserveAspect = true;
@@ -384,6 +379,13 @@ public class MusicManager : MonoBehaviour
             {
                 iconObject = existing.gameObject;
             }
+
+            RectTransform iconRect = iconObject.GetComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0f, 0.5f);
+            iconRect.anchorMax = new Vector2(0f, 0.5f);
+            iconRect.pivot = new Vector2(0.5f, 0.5f);
+            iconRect.anchoredPosition = new Vector2(49f, 0f);
+            iconRect.sizeDelta = new Vector2(62f, 62f);
 
             iconObject.SetActive(muted);
             iconObject.transform.SetAsLastSibling();

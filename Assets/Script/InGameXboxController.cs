@@ -140,10 +140,11 @@ public class InGameXboxController : MonoBehaviour
         Rigidbody body = playerController.rb;
         body.angularVelocity = Vector3.zero;
         Vector3 velocity = body.linearVelocity;
+        float movementSpeed = playerController.CurrentSpeed;
         body.linearVelocity = new Vector3(
-            direction.x * playerController.speed,
+            direction.x * movementSpeed,
             velocity.y,
-            direction.z * playerController.speed
+            direction.z * movementSpeed
         );
 
         Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);

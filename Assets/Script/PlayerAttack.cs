@@ -38,9 +38,15 @@ public class PlayerAttack : MonoBehaviour
 
     public void Start()
     {
+        projectileDamage = Mathf.Clamp(projectileDamage, 0f, PlayerStats.MaximumAttack);
         playerStats = GetComponent<PlayerStats>();
 
         SetupHoldAttack();
+    }
+
+    public void OnValidate()
+    {
+        projectileDamage = Mathf.Clamp(projectileDamage, 0f, PlayerStats.MaximumAttack);
     }
 
     public void Update()
@@ -176,9 +182,10 @@ public class PlayerAttack : MonoBehaviour
             projectile.AddComponent<MagicProjectile>();
 
         magicProjectile.owner = gameObject;
-        magicProjectile.damage = playerStats != null
-            ? playerStats.attack
-            : projectileDamage;
+        magicProjectile.damage = Mathf.Min(
+            PlayerStats.MaximumAttack,
+            playerStats != null ? playerStats.attack : projectileDamage
+        );
         magicProjectile.lifeTime = projectileLifetime;
         magicProjectile.fireColor = fireColor;
         magicProjectile.BuildFireLook();

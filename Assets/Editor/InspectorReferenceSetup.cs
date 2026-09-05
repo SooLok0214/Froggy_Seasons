@@ -267,7 +267,9 @@ public static class InspectorReferenceSetup
 
         Image blocker = creditsPanel.GetComponent<Image>();
         blocker.sprite = null;
-        blocker.color = new Color(0f, 0f, 0f, 0.84f);
+        // PausePanel already provides the shared dimmed backdrop. A second dark
+        // Image here would be restored every time this setup utility refreshes UI.
+        blocker.color = Color.clear;
         blocker.raycastTarget = true;
 
         CanvasGroup group = creditsPanel.GetComponent<CanvasGroup>();

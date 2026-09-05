@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
 {
+    public const float MaximumHealth = 1000f;
+
     public float maxHealth = 100f;
     public float currentHealth = 100f;
     public bool isDead;
@@ -36,8 +38,15 @@ public class EnemyHealth : MonoBehaviour
 
     public void Awake()
     {
+        maxHealth = Mathf.Clamp(maxHealth, 1f, MaximumHealth);
         currentHealth = maxHealth;
         CacheHitRenderTargets();
+    }
+
+    public void OnValidate()
+    {
+        maxHealth = Mathf.Clamp(maxHealth, 1f, MaximumHealth);
+        currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
     }
 
     public void TakeDamage(float damage)
@@ -135,8 +144,12 @@ public class EnemyHealth : MonoBehaviour
 
     public void IncreaseMaxHealth(float amount)
     {
-        maxHealth += amount;
-        currentHealth += amount;
+        if (amount <= 0f)
+            return;
+
+        float previousMaxHealth = maxHealth;
+        maxHealth = Mathf.Min(MaximumHealth, maxHealth + amount);
+        currentHealth = Mathf.Min(maxHealth, currentHealth + (maxHealth - previousMaxHealth));
     }
 
     public void Die()

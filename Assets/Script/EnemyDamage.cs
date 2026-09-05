@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class EnemyDamage : MonoBehaviour
 {
+    public const float MaximumDamage = 750f;
+
     public float damage = 5f;
     public float attackInterval = 1f;
 
@@ -9,6 +11,18 @@ public class EnemyDamage : MonoBehaviour
 
     public bool touchingPlayer = false;
     public float attackTimer = 0f;
+
+    public float CurrentDamage => Mathf.Clamp(damage, 0f, MaximumDamage);
+
+    public void Awake()
+    {
+        damage = CurrentDamage;
+    }
+
+    public void OnValidate()
+    {
+        damage = CurrentDamage;
+    }
 
     public void Update()
     {
@@ -19,7 +33,7 @@ public class EnemyDamage : MonoBehaviour
 
         if (attackTimer >= attackInterval)
         {
-            playerStats.TakeDamage(damage);
+            playerStats.TakeDamage(CurrentDamage);
 
             attackTimer = 0f;
         }
@@ -34,7 +48,7 @@ public class EnemyDamage : MonoBehaviour
         touchingPlayer = true;
 
         // 一碰到立刻扣一次血
-        playerStats.TakeDamage(damage);
+        playerStats.TakeDamage(CurrentDamage);
 
         // 然後重新開始計時
         attackTimer = 0f;
@@ -49,6 +63,9 @@ public class EnemyDamage : MonoBehaviour
 
     public void IncreaseDamage(float amount)
     {
-        damage += amount;
+        if (amount <= 0f)
+            return;
+
+        damage = Mathf.Min(MaximumDamage, CurrentDamage + amount);
     }
 }

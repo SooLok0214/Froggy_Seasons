@@ -157,7 +157,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: patrolRadius
-      value: 12.77
+      value: 9.1
       objectReference: {fileID: 0}
     - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: stopDistance
@@ -168,8 +168,20 @@ PrefabInstance:
       value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
+      propertyPath: patrolWaitTime
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: separationRadius
       value: 1.54
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
+      propertyPath: chaseStopDistance
+      value: 25.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
+      propertyPath: chaseStartDistance
+      value: 25.7
       objectReference: {fileID: 0}
     - target: {fileID: 8571508066952279199, guid: 3f16c40ffd81f4e47a2955ff0cd6a738, type: 3}
       propertyPath: separationStrength
